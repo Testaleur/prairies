@@ -1,5 +1,3 @@
-import * as d3 from "d3";
-
 export function drawMap(svg, tooltip, width, height) {
   Promise.all([
     d3.json("/regions.geojson"),
