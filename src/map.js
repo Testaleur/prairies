@@ -43,22 +43,42 @@ export function drawMap(svg, tooltip, width, height) {
         })
         .attr("stroke", "#fff")
         .attr("stroke-width", 0.5)
+        // ... dans ton .on("mouseover")
         .on("mouseover", (event, d) => {
           const name = d.properties.nom.trim();
           const value = dataMap.get(name) || "No data";
-          d3.select(event.currentTarget).attr("stroke-width", 2);
+
+            // 1. On sélectionne l'élément
+          const target = d3.select(event.currentTarget);
+
+            // 2. On le fait passer au premier plan
+          target.raise(); 
+
+            // 3. On applique les styles (passage en noir et plus épais)
+          target
+            .attr("stroke", "#000") // On change la couleur en noir pour que ce soit visible
+            .attr("stroke-width", 2);
+
           tooltip.style("opacity", 1)
-            .html(`<strong>${name}</strong><br/>Value: ${value}`);
-        })
+          .html(`<strong>${name}</strong><br/>Value: ${value}`);
+})
         .on("mousemove", event => {
+
           tooltip
+
             .style("left", event.pageX + 10 + "px")
+
             .style("top", event.pageY + 10 + "px");
+
         })
+            // ... dans ton .on("mouseout")
         .on("mouseout", event => {
-          d3.select(event.currentTarget).attr("stroke-width", 0.5);
-          tooltip.style("opacity", 0);
-        });
+        d3.select(event.currentTarget)
+        .attr("stroke", "#fff") // On remet en blanc
+        .attr("stroke-width", 0.5);
+    
+        tooltip.style("opacity", 0);
+});
 
     })
     .catch(err => console.error("Error loading map/data:", err));
