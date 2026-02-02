@@ -59,17 +59,25 @@ export function drawMap(svg, tooltip, width, height) {
             .attr("stroke", "#000") // On change la couleur en noir pour que ce soit visible
             .attr("stroke-width", 2);
 
-        tooltip.style("opacity", 1)
-        .html(`<strong>${name}</strong><br/>Value: ${value}`);
+          tooltip.style("opacity", 1)
+          .html(`<strong>${name}</strong><br/>Value: ${value}`);
 })
+        .on("mousemove", event => {
 
+          tooltip
+
+            .style("left", event.pageX + 10 + "px")
+
+            .style("top", event.pageY + 10 + "px");
+
+        })
             // ... dans ton .on("mouseout")
-          .on("mouseout", event => {
-          d3.select(event.currentTarget)
-          .attr("stroke", "#fff") // On remet en blanc
-          .attr("stroke-width", 0.5);
+        .on("mouseout", event => {
+        d3.select(event.currentTarget)
+        .attr("stroke", "#fff") // On remet en blanc
+        .attr("stroke-width", 0.5);
     
-          tooltip.style("opacity", 0);
+        tooltip.style("opacity", 0);
 });
 
     })
