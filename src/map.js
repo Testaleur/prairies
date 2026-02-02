@@ -1,7 +1,7 @@
 export function drawMap(svg, tooltip, width, height) {
   Promise.all([
-    d3.json("/regions.geojson"),
-    d3.csv("/data.csv")
+    d3.json("../public/regions.geojson"),
+    d3.csv("../public/data.csv")
   ])
     .then(([geoData, data]) => {
       // Convert CSV to Map using region names (strings)
