@@ -1,4 +1,3 @@
-import * as d3 from "d3";
 import { drawMap } from "./map.js";
 
 const width = 1200;
