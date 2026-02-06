@@ -38,10 +38,7 @@ export function drawMap(svg, tooltip, width, height) {
 
     const path = d3.geoPath().projection(projection);
 
-    // Conteneur principal
     const g = svg.append("g");
-
-    // Calques pour séparer régions et départements
     const regionsLayer = g.append("g").attr("class", "regions-layer");
     const deptsLayer = g.append("g").attr("class", "depts-layer");
 
@@ -53,19 +50,30 @@ export function drawMap(svg, tooltip, width, height) {
 
     svg.call(zoom);
 
-    // --- FONCTION RESET (Retour à la France) ---
+    // --- CRÉATION DU BOUTON RETOUR ---
+    const backButton = d3.select("body")
+      .append("button")
+      .attr("id", "back-button")
+      .text("← Retour à la France")
+      .style("position", "absolute")
+      .style("top", "20px")
+      .style("left", "20px")
+      .style("display", "none") // Caché par défaut
+      .style("z-index", "1000")
+      .on("click", reset);
+
     function reset() {
+      backButton.style("display", "none"); // On cache le bouton au reset
       svg.transition().duration(750).call(
         zoom.transform,
         d3.zoomIdentity
       );
-      // Réaffiche les régions et supprime les départements
       regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
       deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
     }
 
-    // --- FONCTION ZOOM SUR RÉGION ---
     function clicked(event, d) {
+      backButton.style("display", "block"); // On affiche le bouton au clic
       const [[x0, y0], [x1, y1]] = path.bounds(d);
       event.stopPropagation();
 
@@ -80,14 +88,10 @@ export function drawMap(svg, tooltip, width, height) {
       showDepartments(d.properties.nom);
     }
 
-    // --- AFFICHAGE DES DÉPARTEMENTS ---
     function showDepartments(regionName) {
-      // On cache les régions
       regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
 
-      // Filtrer les départements appartenant à cette région
       const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
-
       const depts = deptsLayer.selectAll("path").data(filteredDepts, d => d.properties.nom);
 
       depts.enter()
@@ -116,7 +120,6 @@ export function drawMap(svg, tooltip, width, height) {
         .transition().duration(500).style("opacity", 1);
     }
 
-    // --- DESSIN INITIAL DES RÉGIONS ---
     regionsLayer.selectAll("path")
       .data(regionsData.features)
       .enter()
@@ -143,7 +146,6 @@ export function drawMap(svg, tooltip, width, height) {
       })
       .on("click", clicked);
 
-    // Double-clic sur le fond pour revenir en arrière
     svg.on("dblclick", reset);
   });
 }
