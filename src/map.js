@@ -132,7 +132,7 @@ export function drawMap(svg, tooltip, width, height) {
         const name = d.properties.nom;
         const val = dataMap.get(name.trim()) || "Aucune donnée";
         tooltip.style("opacity", 1).html(`<strong>Région :</strong> ${name}<br/>Valeur : ${val}`);
-        d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 2).raise();
+        d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
       })
       .on("mousemove", (event) => {
         tooltip.style("left", (event.pageX + 10) + "px").style("top", (event.pageY + 10) + "px");
