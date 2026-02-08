@@ -1,7 +1,6 @@
 export function drawMap(svg, tooltip, width, height) {
   const BASE_URL = import.meta.env.BASE_URL;
 
-  // Table de correspondance pour lier les codes départements aux régions
   const deptToRegion = {
     "01": "Auvergne-Rhône-Alpes", "03": "Auvergne-Rhône-Alpes", "07": "Auvergne-Rhône-Alpes", "15": "Auvergne-Rhône-Alpes", "26": "Auvergne-Rhône-Alpes", "38": "Auvergne-Rhône-Alpes", "42": "Auvergne-Rhône-Alpes", "43": "Auvergne-Rhône-Alpes", "63": "Auvergne-Rhône-Alpes", "69": "Auvergne-Rhône-Alpes", "73": "Auvergne-Rhône-Alpes", "74": "Auvergne-Rhône-Alpes",
     "21": "Bourgogne-Franche-Comté", "25": "Bourgogne-Franche-Comté", "39": "Bourgogne-Franche-Comté", "58": "Bourgogne-Franche-Comté", "70": "Bourgogne-Franche-Comté", "71": "Bourgogne-Franche-Comté", "89": "Bourgogne-Franche-Comté", "90": "Bourgogne-Franche-Comté",
@@ -17,6 +16,8 @@ export function drawMap(svg, tooltip, width, height) {
     "44": "Pays de la Loire", "49": "Pays de la Loire", "53": "Pays de la Loire", "72": "Pays de la Loire", "85": "Pays de la Loire",
     "04": "Provence-Alpes-Côte d'Azur", "05": "Provence-Alpes-Côte d'Azur", "06": "Provence-Alpes-Côte d'Azur", "13": "Provence-Alpes-Côte d'Azur", "83": "Provence-Alpes-Côte d'Azur", "84": "Provence-Alpes-Côte d'Azur"
   };
+
+  let currentRegionData = null;
 
   Promise.all([
     d3.json(`${BASE_URL}regions.geojson`),
@@ -39,39 +40,30 @@ export function drawMap(svg, tooltip, width, height) {
     const path = d3.geoPath().projection(projection);
 
     const g = svg.append("g");
-    const regionsLayer = g.append("g").attr("class", "regions-layer");
     const deptsLayer = g.append("g").attr("class", "depts-layer");
+    const regionsLayer = g.append("g").attr("class", "regions-layer");
 
     const zoom = d3.zoom()
-      .scaleExtent([1, 12])
-      .on("zoom", (event) => {
-        g.attr("transform", event.transform);
-      });
+      .scaleExtent([1, 40]) // On augmente la limite de zoom max
+      .on("zoom", (event) => g.attr("transform", event.transform));
 
-    svg.call(zoom);
-
-    let currentRegionData = null; 
-
-    // --- CRÉATION DU BOUTON RETOUR ---
-    const backButton = d3.select("body")
-      .append("button")
+    const backButton = d3.select("body").append("button")
       .attr("id", "back-button")
       .text("← Retour à la France")
-      .style("position", "absolute")
-      .style("top", "20px")
-      .style("left", "20px")
-      .style("display", "none") // Caché par défaut
-      .style("z-index", "1000")
+      .style("position", "absolute").style("top", "20px").style("left", "20px")
+      .style("display", "none").style("z-index", "1000")
       .on("click", reset);
 
     function reset() {
       if (backButton.text() === "← Retour à la Région" && currentRegionData) {
-        // Si on est sur un département, on revient à la vue Région
-        clicked(null, currentRegionData); 
-        // On remet l'opacité des départements à 1
+        // Retour à la vue région
+        backButton.text("← Retour à la France");
+        // On remet tous les départements visibles
         deptsLayer.selectAll("path").transition().duration(500).style("opacity", 1);
+        // On relance le zoom sur la région avec la même logique que clicked
+        zoomToFeature(currentRegionData, 0.8); // 0.8 = un peu moins zoomé pour voir les bords
       } else {
-        // Sinon on revient à la France entière
+        // Retour à la France entière
         backButton.style("display", "none");
         svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
         regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
@@ -80,33 +72,50 @@ export function drawMap(svg, tooltip, width, height) {
       }
     }
 
-    function clicked(event, d) {
-      currentRegionData = d; // On enregistre la région actuelle
-      backButton.style("display", "block").text("← Retour à la France");
-      
+    // Fonction générique pour zoomer proprement sans coller aux bords
+    function zoomToFeature(d, paddingFactor = 0.8) {
       const [[x0, y0], [x1, y1]] = path.bounds(d);
-      event.stopPropagation();
-
       svg.transition().duration(750).call(
         zoom.transform,
         d3.zoomIdentity
           .translate(width / 2, height / 2)
-          .scale(Math.min(8, 0.9 / Math.max((x1 - x0) / width, (y1 - y0) / height)))
+          .scale(Math.min(40, paddingFactor / Math.max((x1 - x0) / width, (y1 - y0) / height)))
           .translate(-(x0 + x1) / 2, -(y0 + y1) / 2)
       );
+    }
 
+    function clicked(event, d) {
+      currentRegionData = d;
+      backButton.style("display", "block").text("← Retour à la France");
+      if (event) event.stopPropagation();
+
+      zoomToFeature(d, 0.7); // Zoom région avec marge
       showDepartments(d.properties.nom);
+    }
+
+    function zoomToDept(event, d) {
+      event.stopPropagation();
+      backButton.text("← Retour à la Région");
+
+      zoomToFeature(d, 0.5); // Zoom département encore plus "marge" pour éviter de coller
+
+      // On fait disparaître complètement les autres départements
+      deptsLayer.selectAll("path")
+        .transition().duration(750)
+        .style("opacity", (node) => node === d ? 1 : 0);
     }
 
     function showDepartments(regionName) {
       regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
 
       const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
+
       const depts = deptsLayer.selectAll("path").data(filteredDepts, d => d.properties.nom);
 
       depts.enter()
         .append("path")
         .attr("d", path)
+        .style("vector-effect", "non-scaling-stroke")
         .attr("fill", d => {
           const val = dataMap.get(d.properties.nom.trim());
           return val !== undefined ? colorScale(val) : "#eee";
@@ -127,30 +136,8 @@ export function drawMap(svg, tooltip, width, height) {
           tooltip.style("opacity", 0);
           d3.select(event.currentTarget).attr("stroke", "#fff").attr("stroke-width", 0.5);
         })
-        .on("click", (event, d) => {
-          zoomToDept(event, d);
-        })
+        .on("click", (event, d) => zoomToDept(event, d))
         .transition().duration(500).style("opacity", 1);
-    }
-
-    function zoomToDept(event, d) {
-      event.stopPropagation();
-      const [[x0, y0], [x1, y1]] = path.bounds(d);
-
-      backButton.text("← Retour à la Région");
-
-      svg.transition().duration(750).call(
-        zoom.transform,
-        d3.zoomIdentity
-          .translate(width / 2, height / 2)
-          .scale(10) // Zoom très fort sur le département
-          .translate(-(x0 + x1) / 2, -(y0 + y1) / 2)
-      );
-      
-      // On met en avant le département cliqué
-      deptsLayer.selectAll("path")
-        .transition().duration(750)
-        .style("opacity", (node) => node === d ? 1 : 0.2);
     }
 
     regionsLayer.selectAll("path")
@@ -158,6 +145,7 @@ export function drawMap(svg, tooltip, width, height) {
       .enter()
       .append("path")
       .attr("d", path)
+      .style("vector-effect", "non-scaling-stroke")
       .attr("fill", d => {
         const val = dataMap.get(d.properties.nom.trim());
         return val ? colorScale(val) : "#ddd";
@@ -178,7 +166,5 @@ export function drawMap(svg, tooltip, width, height) {
         d3.select(event.currentTarget).attr("stroke", "#fff").attr("stroke-width", 1);
       })
       .on("click", clicked);
-
-    svg.on("dblclick", reset);
   });
 }
