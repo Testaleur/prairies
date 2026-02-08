@@ -20,10 +20,11 @@ export function drawMap(svg, tooltip, width, height) {
   let currentRegionData = null;
 
   Promise.all([
-    d3.json(`${BASE_URL}regions.geojson`),
-    d3.json(`${BASE_URL}departements.geojson`),
-    d3.csv(`${BASE_URL}data.csv`)
-  ]).then(([regionsData, deptsData, data]) => {
+  d3.json(`${BASE_URL}regions.geojson`),
+  d3.json(`${BASE_URL}departements.geojson`),
+  d3.json(`${BASE_URL}arrondissements.geojson`), // Ajout du fichier
+  d3.csv(`${BASE_URL}data.csv`)
+]).then(([regionsData, deptsData, arrData, data]) => { // On récupère arrData
 
     const dataMap = new Map(data.map(d => [d.nom.trim(), +d.value]));
     const maxValue = d3.max(data, d => +d.value) || 100;
@@ -42,6 +43,7 @@ export function drawMap(svg, tooltip, width, height) {
     const g = svg.append("g");
     const deptsLayer = g.append("g").attr("class", "depts-layer");
     const regionsLayer = g.append("g").attr("class", "regions-layer");
+    const arrLayer = g.append("g").attr("class", "arr-layer");
 
     const zoom = d3.zoom()
       .scaleExtent([1, 40]) // On augmente la limite de zoom max
@@ -55,22 +57,29 @@ export function drawMap(svg, tooltip, width, height) {
       .on("click", reset);
 
     function reset() {
-      if (backButton.text() === "← Retour à la Région" && currentRegionData) {
-        // Retour à la vue région
-        backButton.text("← Retour à la France");
-        // On remet tous les départements visibles
-        deptsLayer.selectAll("path").transition().duration(500).style("opacity", 1);
-        // On relance le zoom sur la région avec la même logique que clicked
-        zoomToFeature(currentRegionData, 0.8); // 0.8 = un peu moins zoomé pour voir les bords
-      } else {
-        // Retour à la France entière
-        backButton.style("display", "none");
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-        regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
-        deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
-        currentRegionData = null;
-      }
-    }
+  const currentText = backButton.text();
+
+  if (currentText === "← Retour au Département") {
+    backButton.text("← Retour à la Région");
+    arrLayer.selectAll("path").transition().duration(500).style("opacity", 1);
+    zoomToFeature(currentRegionData, 0.8);
+  } 
+  else if (currentText === "← Retour à la Région") {
+    backButton.text("← Retour à la France");
+    arrLayer.selectAll("path").remove(); // On vide les arrondissements
+    deptsLayer.selectAll("path").transition().duration(500).style("opacity", 1);
+    zoomToFeature(currentRegionData, 0.8);
+  } 
+  else {
+    // Retour total à la France
+    backButton.style("display", "none");
+    svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+    regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
+    deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
+    arrLayer.selectAll("path").remove();
+    currentRegionData = null;
+  }
+}
 
     // Fonction générique pour zoomer proprement sans coller aux bords
     function zoomToFeature(d, paddingFactor = 0.8) {
@@ -94,16 +103,54 @@ export function drawMap(svg, tooltip, width, height) {
     }
 
     function zoomToDept(event, d) {
-      event.stopPropagation();
-      backButton.text("← Retour à la Région");
+  event.stopPropagation();
+  const deptCode = d.properties.code; 
+  backButton.text("← Retour à la Région");
 
-      zoomToFeature(d, 0.5); // Zoom département encore plus "marge" pour éviter de coller
+  zoomToFeature(d, 0.8);
 
-      // On fait disparaître complètement les autres départements
-      deptsLayer.selectAll("path")
-        .transition().duration(750)
-        .style("opacity", (node) => node === d ? 1 : 0);
-    }
+  // On cache le département pour voir les arrondissements
+  deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0);
+
+  // Filtrage des arrondissements appartenant au département (code_dept ou les 2 premiers chiffres du code arr)
+  // Note : vérifie si dans ton JSON la propriété est "code" ou "code_dept"
+  const filteredArrs = arrData.features.filter(f => f.properties.code.startsWith(deptCode));
+
+  const arrondissements = arrLayer.selectAll("path").data(filteredArrs, d => d.properties.nom);
+
+  arrondissements.enter()
+    .append("path")
+    .attr("d", path)
+    .style("vector-effect", "non-scaling-stroke")
+    .attr("fill", "#f0f0f0")
+    .attr("stroke", "#999")
+    .attr("stroke-width", 0.3)
+    .style("opacity", 0)
+    .on("mouseover", (event, d) => {
+      tooltip.style("opacity", 1).html(`<strong>Arrondissement :</strong> ${d.properties.nom}`);
+      d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1).raise();
+    })
+    .on("mouseout", (event) => {
+      tooltip.style("opacity", 0);
+      d3.select(event.currentTarget).attr("stroke", "#999").attr("stroke-width", 0.3);
+    })
+    .on("click", (event, d) => {
+       // ICI : Futur zoom sur les prairies ou communes
+       zoomToArr(event, d);
+    })
+    .transition().duration(500).style("opacity", 1);
+}
+
+    function zoomToArr(event, d) {
+  event.stopPropagation();
+  backButton.text("← Retour au Département");
+  zoomToFeature(d, 0.9);
+  
+  // On peut isoler l'arrondissement
+  arrLayer.selectAll("path")
+    .transition().duration(750)
+    .style("opacity", node => node === d ? 1 : 0.1);
+}
 
     function showDepartments(regionName) {
       regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
