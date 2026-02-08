@@ -50,6 +50,8 @@ export function drawMap(svg, tooltip, width, height) {
 
     svg.call(zoom);
 
+    let currentRegionData = null; 
+
     // --- CRÉATION DU BOUTON RETOUR ---
     const backButton = d3.select("body")
       .append("button")
@@ -63,17 +65,25 @@ export function drawMap(svg, tooltip, width, height) {
       .on("click", reset);
 
     function reset() {
-      backButton.style("display", "none"); // On cache le bouton au reset
-      svg.transition().duration(750).call(
-        zoom.transform,
-        d3.zoomIdentity
-      );
-      regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
-      deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
+      if (backButton.text() === "← Retour à la Région" && currentRegionData) {
+        // Si on est sur un département, on revient à la vue Région
+        clicked(null, currentRegionData); 
+        // On remet l'opacité des départements à 1
+        deptsLayer.selectAll("path").transition().duration(500).style("opacity", 1);
+      } else {
+        // Sinon on revient à la France entière
+        backButton.style("display", "none");
+        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+        regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
+        deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
+        currentRegionData = null;
+      }
     }
 
     function clicked(event, d) {
-      backButton.style("display", "block"); // On affiche le bouton au clic
+      currentRegionData = d; // On enregistre la région actuelle
+      backButton.style("display", "block").text("← Retour à la France");
+      
       const [[x0, y0], [x1, y1]] = path.bounds(d);
       event.stopPropagation();
 
@@ -117,7 +127,30 @@ export function drawMap(svg, tooltip, width, height) {
           tooltip.style("opacity", 0);
           d3.select(event.currentTarget).attr("stroke", "#fff").attr("stroke-width", 0.5);
         })
+        .on("click", (event, d) => {
+          zoomToDept(event, d);
+        })
         .transition().duration(500).style("opacity", 1);
+    }
+
+    function zoomToDept(event, d) {
+      event.stopPropagation();
+      const [[x0, y0], [x1, y1]] = path.bounds(d);
+
+      backButton.text("← Retour à la Région");
+
+      svg.transition().duration(750).call(
+        zoom.transform,
+        d3.zoomIdentity
+          .translate(width / 2, height / 2)
+          .scale(10) // Zoom très fort sur le département
+          .translate(-(x0 + x1) / 2, -(y0 + y1) / 2)
+      );
+      
+      // On met en avant le département cliqué
+      deptsLayer.selectAll("path")
+        .transition().duration(750)
+        .style("opacity", (node) => node === d ? 1 : 0.2);
     }
 
     regionsLayer.selectAll("path")
