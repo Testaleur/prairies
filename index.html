@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carte des prairies</title>
+    <title>Carte des prairies</title>
     <script type="module" crossorigin src="/prairies/assets/index-BZrf-eXV.js"></script>
     <link rel="stylesheet" crossorigin href="/prairies/assets/index-Dkbvo9Jj.css">
   </head>
@@ -33,9 +33,11 @@
           <label for="prairie-type">Type de prairie</label>
           <select id="prairie-type">
             <option value="all">Tous les types</option>
-            <option value="permanente">Prairies permanentes</option>
-            <option value="temporaire">Prairies temporaires</option>
-            <option value="artificielle">Prairies artificielles</option>
+            <option value="pph">Prairies permanentes</option>
+            <option value="sph">Surface pastorale (Herbe prédominante)</option>
+            <option value="spl">Surface pastorale (Ressources fourragères ligneuses prédominantes)</option>
+            <option value="cae">Châtaigneraie</option>
+            <option value="cee">Chênaie</option>
           </select>
         </div>
 
@@ -60,6 +62,6 @@
       </aside>
     </div>
 
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
   </body>
 </html>
