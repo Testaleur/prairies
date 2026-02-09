@@ -7,17 +7,21 @@ body {
   overflow: hidden; /* Empêche le scroll sur toute la page */
 }
 
-#map-container h1 {
+#map-title {
   position: absolute;
-  top: 10px;
-  left: 20px;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
+  font-weight: bold;
   color: #2c3e50;
   z-index: 10;
-  background: rgba(240, 242, 245, 0.7);
-  padding: 5px 10px;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 8px 25px;
+  border-radius: 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  white-space: nowrap;
 }
 
 /* Conteneur principal qui sépare Carte (gauche) et Sidebar (droite) */
@@ -61,6 +65,10 @@ path {
 
 /* --- BOUTONS ET TOOLTIP --- */
 #back-button {
+  position: absolute;
+  top: 20px; /* Aligné avec le titre mais à gauche */
+  left: 20px;
+  z-index: 1001;
   z-index: 1001;
   cursor: pointer;
   background: #27ae60;

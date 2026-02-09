@@ -57,27 +57,28 @@ export function drawMap(svg, tooltip, width, height) {
 
     function reset() {
       const currentText = backButton.text();
+
       if (currentText === "← Retour au Département") {
+        // On remonte de Arrondissement vers la vue Département (donc bouton devient "Retour Région")
         backButton.text("← Retour à la Région");
+        arrLayer.selectAll("path").transition().duration(500).style("opacity", 1);
+        zoomToFeature(currentDeptData, 0.8);
+      } 
+      else if (currentText === "← Retour à la Région") {
+        // On remonte de Département vers la vue Région (donc bouton devient "Retour France")
+        backButton.text("← Retour à la France");
+        arrLayer.selectAll("path").remove();
         showDepartments(currentRegionData.properties.nom);
         zoomToFeature(currentRegionData, 0.8);
       } 
-      else if (currentText === "← Retour à la Région") {
-        backButton.text("← Retour à la France");
-        arrLayer.selectAll("path").remove();
-        updateLegend(maxValueRegions, "Valeur par Région");
-        regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
-        deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-        currentRegionData = null;
-      } 
-      else {
+      else if (currentText === "← Retour à la France") {
+        // On remonte au tout début
         backButton.style("display", "none");
-        updateLegend(maxValueRegions, "Valeur par Région");
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-        regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
-        deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
         arrLayer.selectAll("path").remove();
+        deptsLayer.selectAll("path").remove();
+        updateLegend(maxValueRegions, "Valeur par Région");
+        regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
+        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
         currentRegionData = null;
       }
     }
@@ -95,7 +96,9 @@ export function drawMap(svg, tooltip, width, height) {
 
     function clicked(event, d) {
       currentRegionData = d;
+      // On vient de cliquer sur une région, donc le bouton doit ramener à la France
       backButton.style("display", "block").text("← Retour à la France");
+      
       if (event) event.stopPropagation();
       zoomToFeature(d, 0.7);
       showDepartments(d.properties.nom);
@@ -105,14 +108,21 @@ export function drawMap(svg, tooltip, width, height) {
       event.stopPropagation();
       currentDeptData = d;
       const deptCode = d.properties.code; 
-      backButton.text("← Retour à la Région");
+      
+      // MISE À JOUR BOUTON : On vient de cliquer sur un département, on veut pouvoir revenir à la Région
+      backButton.style("display", "block").text("← Retour à la Région");
+
       const filteredArrs = arrData.features.filter(f => f.properties.code.startsWith(deptCode));
       const localMax = d3.max(filteredArrs, f => dataMap.get(f.properties.nom.trim())) || 1;
       const localScale = d3.scaleSequential().domain([0, localMax]).interpolator(d3.interpolateGreens);
+
       updateLegend(localMax, "Valeur par Arrond.");
       zoomToFeature(d, 0.8);
+
       deptsLayer.selectAll("path").style("pointer-events", "none").transition().duration(500).style("opacity", 0);
+
       const arrondissements = arrLayer.selectAll("path").data(filteredArrs, d => d.properties.nom);
+
       arrondissements.enter()
         .append("path")
         .attr("d", path)
@@ -124,16 +134,25 @@ export function drawMap(svg, tooltip, width, height) {
         .on("mouseover", (event, d) => {
           const name = d.properties.nom.trim();
           const val = dataMap.get(name) || 0;
+          
+          // Tooltip riche
           tooltip.style("opacity", 1).html(`
-            <div style="font-weight:bold;">${name}</div>
-            <hr>
+            <div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${name}</div>
+            <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
             <div><strong>Prairies :</strong> ${val}</div>
+            <div><strong>Surface :</strong> ${(val * 0.8).toFixed(1)} %</div>
             <div><strong>Altitude :</strong> ${Math.floor(Math.random()*600 + 100)}m</div>
           `);
-          d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
+          
+          // Bordure noire et mise au premier plan
+          d3.select(event.currentTarget)
+            .attr("stroke", "#000")
+            .attr("stroke-width", 1.5)
+            .raise();
         })
         .on("mousemove", (event) => {
-          tooltip.style("left", (event.pageX + 10) + "px").style("top", (event.pageY + 10) + "px");
+          // Suivi de la souris
+          tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY + 15) + "px");
         })
         .on("mouseout", (event) => {
           tooltip.style("opacity", 0);
@@ -145,6 +164,7 @@ export function drawMap(svg, tooltip, width, height) {
 
     function zoomToArr(event, d) {
       event.stopPropagation();
+      // On vient de cliquer sur un arrondissement, donc le bouton doit ramener au DÉPARTEMENT
       backButton.text("← Retour au Département");
       zoomToFeature(d, 0.9);
       arrLayer.selectAll("path").transition().duration(750).style("opacity", node => node === d ? 1 : 0.1);
@@ -152,11 +172,15 @@ export function drawMap(svg, tooltip, width, height) {
 
     function showDepartments(regionName) {
       regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
+
       const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
       const localMax = d3.max(filteredDepts, f => dataMap.get(f.properties.nom.trim())) || 1;
       const localScale = d3.scaleSequential().domain([0, localMax]).interpolator(d3.interpolateGreens);
+
       updateLegend(localMax, "Valeur par Dept");
+
       const depts = deptsLayer.selectAll("path").data(filteredDepts, d => d.properties.nom);
+
       depts.enter()
         .append("path")
         .attr("d", path)
@@ -168,11 +192,18 @@ export function drawMap(svg, tooltip, width, height) {
         .on("mouseover", (event, d) => {
           const name = d.properties.nom;
           const val = dataMap.get(name.trim()) || 0;
-          tooltip.style("opacity", 1).html(`<strong>${name}</strong><br>Prairies : ${val}`);
+          
+          tooltip.style("opacity", 1).html(`
+            <div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${name}</div>
+            <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
+            <div><strong>Prairies :</strong> ${val}</div>
+            <div><strong>Altitude :</strong> ${Math.floor(Math.random()*400 + 50)}m</div>
+          `);
+          
           d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
         })
         .on("mousemove", (event) => {
-          tooltip.style("left", (event.pageX + 10) + "px").style("top", (event.pageY + 10) + "px");
+          tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY + 15) + "px");
         })
         .on("mouseout", (event) => {
           tooltip.style("opacity", 0);
@@ -218,7 +249,7 @@ export function drawMap(svg, tooltip, width, height) {
     svg.selectAll(".legend-group").remove();
     const legendG = svg.append("g")
       .attr("class", "legend-group")
-      .attr("transform", `translate(25, 120)`);
+      .attr("transform", `translate(25, 140)`);
 
     const defs = svg.append("defs");
     const linearGradient = defs.append("linearGradient")
