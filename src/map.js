@@ -30,8 +30,8 @@ export function drawMap(svg, tooltip, width, height) {
     const maxValue = d3.max(data, d => +d.value) || 100;
 
     const colorScale = d3.scaleSequential()
-      .domain([0, maxValue])
-      .interpolator(d3.interpolateBlues);
+  .domain([0, maxValue])
+  .interpolator(d3.interpolateGreens);
 
     const projection = d3.geoConicConformal()
       .center([2.2137, 46.2276])
@@ -68,6 +68,7 @@ export function drawMap(svg, tooltip, width, height) {
     backButton.text("← Retour à la France");
     arrLayer.selectAll("path").remove(); // On vide les arrondissements
     deptsLayer.selectAll("path").transition().duration(500).style("opacity", 1);
+    deptsLayer.selectAll("path").style("pointer-events", "all");
     zoomToFeature(currentRegionData, 0.8);
   } 
   else {
@@ -110,6 +111,7 @@ export function drawMap(svg, tooltip, width, height) {
   zoomToFeature(d, 0.8);
 
   // On cache le département pour voir les arrondissements
+  deptsLayer.selectAll("path").style("pointer-events", "none");
   deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0);
 
   // Filtrage des arrondissements appartenant au département (code_dept ou les 2 premiers chiffres du code arr)
@@ -136,7 +138,7 @@ export function drawMap(svg, tooltip, width, height) {
           const val = dataMap.get(name) || "Aucune donnée";
           
           tooltip.style("opacity", 1)
-            .html(`<strong>Arrondissement :</strong> ${name}<br/>Valeur : ${val}`);
+            .html(`<strong>Arrondissement :</strong> ${name}<br/>Nombre de prairies : ${val}`);
           
           // Effet de bordure au survol
           d3.select(event.currentTarget)
@@ -198,7 +200,7 @@ export function drawMap(svg, tooltip, width, height) {
         .on("mouseover", (event, d) => {
           const name = d.properties.nom;
           const val = dataMap.get(name.trim()) || "Aucune donnée";
-          tooltip.style("opacity", 1).html(`<strong>Département :</strong> ${name}<br/>Valeur : ${val}`);
+          tooltip.style("opacity", 1).html(`<strong>Département :</strong> ${name}<br/>Nombre de prairies : ${val}`);
           d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
         })
         .on("mousemove", (event) => {
@@ -227,7 +229,7 @@ export function drawMap(svg, tooltip, width, height) {
       .on("mouseover", (event, d) => {
         const name = d.properties.nom;
         const val = dataMap.get(name.trim()) || "Aucune donnée";
-        tooltip.style("opacity", 1).html(`<strong>Région :</strong> ${name}<br/>Valeur : ${val}`);
+        tooltip.style("opacity", 1).html(`<strong>Région :</strong> ${name}<br/>Nombre de prairies : ${val}`);
         d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
       })
       .on("mousemove", (event) => {
