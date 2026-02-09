@@ -119,26 +119,51 @@ export function drawMap(svg, tooltip, width, height) {
   const arrondissements = arrLayer.selectAll("path").data(filteredArrs, d => d.properties.nom);
 
   arrondissements.enter()
-    .append("path")
-    .attr("d", path)
-    .style("vector-effect", "non-scaling-stroke")
-    .attr("fill", "#f0f0f0")
-    .attr("stroke", "#999")
-    .attr("stroke-width", 0.3)
-    .style("opacity", 0)
-    .on("mouseover", (event, d) => {
-      tooltip.style("opacity", 1).html(`<strong>Arrondissement :</strong> ${d.properties.nom}`);
-      d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1).raise();
-    })
-    .on("mouseout", (event) => {
-      tooltip.style("opacity", 0);
-      d3.select(event.currentTarget).attr("stroke", "#999").attr("stroke-width", 0.3);
-    })
-    .on("click", (event, d) => {
-       // ICI : Futur zoom sur les prairies ou communes
-       zoomToArr(event, d);
-    })
-    .transition().duration(500).style("opacity", 1);
+        .append("path")
+        .attr("d", path)
+        .style("vector-effect", "non-scaling-stroke")
+        .attr("fill", d => {
+          const name = d.properties.nom.trim();
+          const val = dataMap.get(name);
+          // Si on trouve la valeur dans le CSV on colorie, sinon gris clair
+          return val !== undefined ? colorScale(val) : "#eee";
+        })
+        .attr("stroke", "#999")
+        .attr("stroke-width", 0.5)
+        .style("opacity", 0)
+        .on("mouseover", (event, d) => {
+          const name = d.properties.nom.trim();
+          const val = dataMap.get(name) || "Aucune donnée";
+          
+          tooltip.style("opacity", 1)
+            .html(`<strong>Arrondissement :</strong> ${name}<br/>Valeur : ${val}`);
+          
+          // Effet de bordure au survol
+          d3.select(event.currentTarget)
+            .attr("stroke", "#000")
+            .attr("stroke-width", 1.5)
+            .raise();
+        })
+        .on("mousemove", (event) => {
+          tooltip
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY + 10) + "px");
+        })
+        .on("mouseout", (event) => {
+          tooltip.style("opacity", 0);
+          
+          // On remet la bordure normale
+          d3.select(event.currentTarget)
+            .attr("stroke", "#999")
+            .attr("stroke-width", 0.5);
+        })
+        .on("click", (event, d) => {
+          // Appel de la fonction pour zoomer encore plus (vers les futures prairies)
+          zoomToArr(event, d);
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 1);
 }
 
     function zoomToArr(event, d) {
