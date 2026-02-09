@@ -140,7 +140,7 @@ export function drawMap(svg, tooltip, width, height) {
             <div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${name}</div>
             <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
             <div><strong>Prairies :</strong> ${val}</div>
-            <div><strong>Surface :</strong> ${(val * 0.8).toFixed(1)} %</div>
+            <div><strong>Surface :</strong> ${Math.floor(Math.random()*20)} %</div>
             <div><strong>Altitude :</strong> ${Math.floor(Math.random()*600 + 100)}m</div>
           `);
           
