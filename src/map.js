@@ -228,7 +228,7 @@ export function drawMap(svg, tooltip, width, height) {
     
     const legendG = svg.append("g")
       .attr("class", "legend-group")
-      .attr("transform", `translate(${width - 100}, ${height - 250})`);
+      .attr("transform", `translate(25, 80)`);
 
     const defs = svg.append("defs");
     const linearGradient = defs.append("linearGradient")
@@ -258,10 +258,11 @@ export function drawMap(svg, tooltip, width, height) {
       .call(yAxis);
 
     legendG.append("text")
-      .attr("x", -10)
-      .attr("y", -10)
-      .style("font-size", "12px")
-      .style("font-weight", "bold")
-      .text(label);
+  .attr("x", 0)
+  .attr("y", -15) // On remonte un peu le titre
+  .style("font-size", "12px")
+  .style("font-family", "sans-serif")
+  .style("font-weight", "bold")
+  .text(label);
   }
 }
