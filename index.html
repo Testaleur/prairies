@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,9 +7,57 @@
     <link rel="stylesheet" href="src/style.css" />
   </head>
   <body>
-    <h1>Carte des prairies</h1>
-    <div id="map"></div>
-    <div id="tooltip" class="tooltip"></div>
+    <div id="app-container">
+      <div id="map-container">
+        <h1>Analyse des Prairies en France</h1>
+        <div id="tooltip" class="tooltip"></div>
+        <div id="map"></div>
+      </div>
+
+      <aside id="sidebar">
+        <h2>Contrôles</h2>
+        
+        <div class="control-group">
+          <label>Évolution temporelle</label>
+          <div class="flex-row">
+            <input type="range" min="2015" max="2024" value="2024" id="year-slider">
+            <span id="year-display">2024</span>
+          </div>
+          <button id="play-button">▶ Lancer l'animation</button>
+        </div>
+
+        <hr>
+
+        <div class="control-group">
+          <label for="prairie-type">Type de prairie</label>
+          <select id="prairie-type">
+            <option value="all">Tous les types</option>
+            <option value="permanente">Prairies permanentes</option>
+            <option value="temporaire">Prairies temporaires</option>
+            <option value="artificielle">Prairies artificielles</option>
+          </select>
+        </div>
+
+        <hr>
+
+        <div class="control-group">
+          <label>Altitude min (m)</label>
+          <input type="range" min="0" max="3000" step="100" value="0" id="alt-slider">
+          <div class="flex-row">
+            <span>0m</span>
+            <span id="alt-display">0m</span>
+            <span>3000m</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="control-group">
+          <label><input type="checkbox" id="check-pente"> Afficher les pentes</label>
+          <label><input type="checkbox" id="check-alt"> Afficher l'altitude (dégradé)</label>
+        </div>
+      </aside>
+    </div>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="module" src="src/main.js"></script>

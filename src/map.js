@@ -18,7 +18,7 @@ export function drawMap(svg, tooltip, width, height) {
   };
 
   let currentRegionData = null;
-  let currentDeptData = null; // Pour le retour arrière des arrondissements
+  let currentDeptData = null;
 
   Promise.all([
     d3.json(`${BASE_URL}regions.geojson`),
@@ -28,8 +28,7 @@ export function drawMap(svg, tooltip, width, height) {
   ]).then(([regionsData, deptsData, arrData, data]) => {
 
     const dataMap = new Map(data.map(d => [d.nom.trim(), +d.value]));
-    
-    // Max National (pour les régions)
+
     const regionsNames = regionsData.features.map(f => f.properties.nom.trim());
     const maxValueRegions = d3.max(regionsNames, name => dataMap.get(name)) || 100;
 
@@ -49,26 +48,23 @@ export function drawMap(svg, tooltip, width, height) {
       .scaleExtent([1, 40])
       .on("zoom", (event) => g.attr("transform", event.transform));
 
-    const backButton = d3.select("body").append("button")
+    const backButton = d3.select("#map-container").append("button")
       .attr("id", "back-button")
       .text("← Retour à la France")
-      .style("position", "absolute").style("top", "20px").style("left", "20px")
+      .style("position", "absolute").style("top", "70px").style("left", "20px")
       .style("display", "none").style("z-index", "1000")
       .on("click", reset);
 
     function reset() {
       const currentText = backButton.text();
-
       if (currentText === "← Retour au Département") {
         backButton.text("← Retour à la Région");
-        // On réaffiche tous les départements de la région avec leur échelle locale
         showDepartments(currentRegionData.properties.nom);
         zoomToFeature(currentRegionData, 0.8);
       } 
       else if (currentText === "← Retour à la Région") {
         backButton.text("← Retour à la France");
         arrLayer.selectAll("path").remove();
-        // Retour vue France (Régions)
         updateLegend(maxValueRegions, "Valeur par Région");
         regionsLayer.selectAll("path").transition().duration(500).style("opacity", 1).style("pointer-events", "all");
         deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).remove();
@@ -105,28 +101,18 @@ export function drawMap(svg, tooltip, width, height) {
       showDepartments(d.properties.nom);
     }
 
-    // --- FONCTION POUR LES ARRONDISSEMENTS (ZOOM LOCAL) ---
     function zoomToDept(event, d) {
       event.stopPropagation();
       currentDeptData = d;
       const deptCode = d.properties.code; 
       backButton.text("← Retour à la Région");
-
-      // 1. Filtrer les arrondissements du département
       const filteredArrs = arrData.features.filter(f => f.properties.code.startsWith(deptCode));
-      
-      // 2. Calculer le MAX LOCAL pour ce département spécifique
       const localMax = d3.max(filteredArrs, f => dataMap.get(f.properties.nom.trim())) || 1;
       const localScale = d3.scaleSequential().domain([0, localMax]).interpolator(d3.interpolateGreens);
-
-      // 3. Update Légende
       updateLegend(localMax, "Valeur par Arrond.");
-
       zoomToFeature(d, 0.8);
       deptsLayer.selectAll("path").style("pointer-events", "none").transition().duration(500).style("opacity", 0);
-
       const arrondissements = arrLayer.selectAll("path").data(filteredArrs, d => d.properties.nom);
-
       arrondissements.enter()
         .append("path")
         .attr("d", path)
@@ -137,8 +123,13 @@ export function drawMap(svg, tooltip, width, height) {
         .style("opacity", 0)
         .on("mouseover", (event, d) => {
           const name = d.properties.nom.trim();
-          const val = dataMap.get(name) || "Aucune donnée";
-          tooltip.style("opacity", 1).html(`<strong>Arrondissement :</strong> ${name}<br/>Valeur : ${val}`);
+          const val = dataMap.get(name) || 0;
+          tooltip.style("opacity", 1).html(`
+            <div style="font-weight:bold;">${name}</div>
+            <hr>
+            <div><strong>Prairies :</strong> ${val}</div>
+            <div><strong>Altitude :</strong> ${Math.floor(Math.random()*600 + 100)}m</div>
+          `);
           d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
         })
         .on("mousemove", (event) => {
@@ -159,22 +150,13 @@ export function drawMap(svg, tooltip, width, height) {
       arrLayer.selectAll("path").transition().duration(750).style("opacity", node => node === d ? 1 : 0.1);
     }
 
-    // --- FONCTION POUR LES DEPARTEMENTS (ZOOM LOCAL) ---
     function showDepartments(regionName) {
       regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
-
-      // 1. Filtrer les départements
       const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
-      
-      // 2. Calculer le MAX LOCAL pour cette région spécifique
       const localMax = d3.max(filteredDepts, f => dataMap.get(f.properties.nom.trim())) || 1;
       const localScale = d3.scaleSequential().domain([0, localMax]).interpolator(d3.interpolateGreens);
-
-      // 3. Update Légende
       updateLegend(localMax, "Valeur par Dept");
-
       const depts = deptsLayer.selectAll("path").data(filteredDepts, d => d.properties.nom);
-
       depts.enter()
         .append("path")
         .attr("d", path)
@@ -185,8 +167,8 @@ export function drawMap(svg, tooltip, width, height) {
         .style("opacity", 0)
         .on("mouseover", (event, d) => {
           const name = d.properties.nom;
-          const val = dataMap.get(name.trim()) || "Aucune donnée";
-          tooltip.style("opacity", 1).html(`<strong>Département :</strong> ${name}<br/>Valeur : ${val}`);
+          const val = dataMap.get(name.trim()) || 0;
+          tooltip.style("opacity", 1).html(`<strong>${name}</strong><br>Prairies : ${val}`);
           d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
         })
         .on("mousemove", (event) => {
@@ -199,13 +181,11 @@ export function drawMap(svg, tooltip, width, height) {
         .on("click", (event, d) => zoomToDept(event, d))
         .transition().duration(500).style("opacity", 1);
         
-      // Mise à jour des départements déjà présents si on revient d'un arrondissement
       deptsLayer.selectAll("path").transition().duration(500)
         .attr("fill", d => localScale(dataMap.get(d.properties.nom.trim()) || 0))
         .style("opacity", 1).style("pointer-events", "all");
     }
 
-    // --- DESSIN INITIAL (REGIONS) ---
     const initialScale = d3.scaleSequential().domain([0, maxValueRegions]).interpolator(d3.interpolateGreens);
     updateLegend(maxValueRegions, "Valeur par Région");
 
@@ -220,8 +200,8 @@ export function drawMap(svg, tooltip, width, height) {
       .attr("stroke-width", 1)
       .on("mouseover", (event, d) => {
         const name = d.properties.nom;
-        const val = dataMap.get(name.trim()) || "Aucune donnée";
-        tooltip.style("opacity", 1).html(`<strong>Région :</strong> ${name}<br/>Valeur : ${val}`);
+        const val = dataMap.get(name.trim()) || 0;
+        tooltip.style("opacity", 1).html(`<strong>${name}</strong><br>Prairies : ${val}`);
         d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
       })
       .on("mousemove", (event) => {
@@ -236,12 +216,9 @@ export function drawMap(svg, tooltip, width, height) {
 
   function updateLegend(maxValue, label) {
     svg.selectAll(".legend-group").remove();
-    const legendHeight = 200;
-    const legendWidth = 20;
-    
     const legendG = svg.append("g")
       .attr("class", "legend-group")
-      .attr("transform", `translate(25, 80)`); // Position en haut à gauche
+      .attr("transform", `translate(25, 120)`);
 
     const defs = svg.append("defs");
     const linearGradient = defs.append("linearGradient")
@@ -255,16 +232,12 @@ export function drawMap(svg, tooltip, width, height) {
       .attr("stop-color", d => d3.interpolateGreens(d));
 
     legendG.append("rect")
-      .attr("width", legendWidth).attr("height", legendHeight)
+      .attr("width", 20).attr("height", 150)
       .style("fill", "url(#linear-gradient)");
 
-    const yScale = d3.scaleLinear().domain([0, maxValue]).range([legendHeight, 0]);
+    const yScale = d3.scaleLinear().domain([0, maxValue]).range([150, 0]);
     const yAxis = d3.axisRight(yScale).ticks(5);
-
-    legendG.append("g").attr("transform", `translate(${legendWidth}, 0)`).call(yAxis);
-
-    legendG.append("text")
-      .attr("x", 0).attr("y", -15)
-      .style("font-size", "12px").style("font-weight", "bold").text(label);
+    legendG.append("g").attr("transform", `translate(20, 0)`).call(yAxis);
+    legendG.append("text").attr("y", -10).style("font-size", "12px").style("font-weight", "bold").text(label);
   }
 }
