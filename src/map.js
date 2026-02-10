@@ -35,13 +35,13 @@ const deptCodeToName = {
     d3.json(`${BASE_URL}regions.geojson`),
     d3.json(`${BASE_URL}departements.geojson`),
     d3.json(`${BASE_URL}arrondissements.geojson`),
-    d3.csv(`${BASE_URL}rhone.csv`)
-  ]).then(([regionsData, deptsData, arrData, rhoneData]) => {
+    d3.csv(`${BASE_URL}parcelles.csv`)
+  ]).then(([regionsData, deptsData, arrData, parcellesData]) => {
 
   // --- AGRÉGATION DES DONNÉES ---
 const dataMap = new Map();
 
-rhoneData.forEach(p => {
+parcellesData.forEach(p => {
     // Conversion des codes avec gestion robuste
     const regCode = String(p.reg_parc || '').trim().split('.')[0]; // "84.0" -> "84"
     const deptCode = String(p.dep_parc || '').trim().padStart(2, '0'); // "69" ou "1" -> "69" ou "01"
