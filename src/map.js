@@ -17,6 +17,17 @@ export function drawMap(svg, tooltip, width, height) {
     "04": "Provence-Alpes-Côte d'Azur", "05": "Provence-Alpes-Côte d'Azur", "06": "Provence-Alpes-Côte d'Azur", "13": "Provence-Alpes-Côte d'Azur", "83": "Provence-Alpes-Côte d'Azur", "84": "Provence-Alpes-Côte d'Azur"
   };
 
+  const regCodeToName = {
+    "84": "Auvergne-Rhône-Alpes", "27": "Bourgogne-Franche-Comté", "53": "Bretagne", 
+    "24": "Centre-Val de Loire", "94": "Corse", "44": "Grand Est", "32": "Hauts-de-France", 
+    "11": "Île-de-France", "28": "Normandie", "75": "Nouvelle-Aquitaine", 
+    "76": "Occitanie", "52": "Pays de la Loire", "93": "Provence-Alpes-Côte d'Azur"
+};
+
+const deptCodeToName = {
+    "01": "Ain", "02": "Aisne", "03": "Allier", "04": "Alpes-de-Haute-Provence", "05": "Hautes-Alpes", "06": "Alpes-Maritimes", "07": "Ardèche", "08": "Ardennes", "09": "Ariège", "10": "Aube", "11": "Aude", "12": "Aveyron", "13": "Bouches-du-Rhône", "14": "Calvados", "15": "Cantal", "16": "Charente", "17": "Charente-Maritime", "18": "Cher", "19": "Corrèze", "2A": "Corse-du-Sud", "2B": "Haute-Corse", "21": "Côte-d'Or", "22": "Côtes-d'Armor", "23": "Creuse", "24": "Dordogne", "25": "Doubs", "26": "Drôme", "27": "Eure", "28": "Eure-et-Loir", "29": "Finistère", "30": "Gard", "31": "Haute-Garonne", "32": "Gers", "33": "Gironde", "34": "Hérault", "35": "Ille-et-Vilaine", "36": "Indre", "37": "Indre-et-Loire", "38": "Isère", "39": "Jura", "40": "Landes", "41": "Loir-et-Cher", "42": "Loire", "43": "Haute-Loire", "44": "Loire-Atlantique", "45": "Loiret", "46": "Lot", "47": "Lot-et-Garonne", "48": "Lozère", "49": "Maine-et-Loire", "50": "Manche", "51": "Marne", "52": "Haute-Marne", "53": "Mayenne", "54": "Meurthe-et-Moselle", "55": "Meuse", "56": "Morbihan", "57": "Moselle", "58": "Nièvre", "59": "Nord", "60": "Oise", "61": "Orne", "62": "Pas-de-Calais", "63": "Puy-de-Dôme", "64": "Pyrénées-Atlantiques", "65": "Hautes-Pyrénées", "66": "Pyrénées-Orientales", "67": "Bas-Rhin", "68": "Haut-Rhin", "69": "Rhône", "70": "Haute-Saône", "71": "Saône-et-Loire", "72": "Sarthe", "73": "Savoie", "74": "Haute-Savoie", "75": "Paris", "76": "Seine-Maritime", "77": "Seine-et-Marne", "78": "Yvelines", "79": "Deux-Sèvres", "80": "Somme", "81": "Tarn", "82": "Tarn-et-Garonne", "83": "Var", "84": "Vaucluse", "85": "Vendée", "86": "Vienne", "87": "Haute-Vienne", "88": "Vosges", "89": "Yonne", "90": "Territoire de Belfort", "91": "Essonne", "92": "Hauts-de-Seine", "93": "Seine-Saint-Denis", "94": "Val-de-Marne", "95": "Val-d'Oise"
+};
+
   let currentRegionData = null;
   let currentDeptData = null;
 
@@ -24,13 +35,55 @@ export function drawMap(svg, tooltip, width, height) {
     d3.json(`${BASE_URL}regions.geojson`),
     d3.json(`${BASE_URL}departements.geojson`),
     d3.json(`${BASE_URL}arrondissements.geojson`),
-    d3.csv(`${BASE_URL}data.csv`)
-  ]).then(([regionsData, deptsData, arrData, data]) => {
+    d3.csv(`${BASE_URL}rhone.csv`)
+  ]).then(([regionsData, deptsData, arrData, rhoneData]) => {
 
-    const dataMap = new Map(data.map(d => [d.nom.trim(), +d.value]));
+  // --- AGRÉGATION DES DONNÉES ---
+const dataMap = new Map();
+
+rhoneData.forEach(p => {
+    // Conversion des codes avec gestion robuste
+    const regCode = String(p.reg_parc || '').trim().split('.')[0]; // "84.0" -> "84"
+    const deptCode = String(p.dep_parc || '').trim().padStart(2, '0'); // "69" ou "1" -> "69" ou "01"
+    
+    const regName = regCodeToName[regCode];
+    const deptName = deptCodeToName[deptCode];
+    
+    const alt = +p.alt_mean || 0;
+    const surf = +p.SURF_PARC || 0;
+
+    const updateStats = (name) => {
+        if (!name) return;
+        if (!dataMap.has(name)) {
+            dataMap.set(name, { count: 0, sumAlt: 0, sumSurf: 0 });
+        }
+        const s = dataMap.get(name);
+        s.count += 1;
+        s.sumAlt += alt;
+        s.sumSurf += surf;
+    };
+
+    updateStats(regName);
+    updateStats(deptName);
+});
+
+// Calcul des moyennes
+dataMap.forEach(v => {
+    v.avgAlt = v.count > 0 ? Math.round(v.sumAlt / v.count) : 0;
+});
+
+// DEBUG: Afficher les données agrégées
+console.log("=== DONNÉES AGRÉGÉES ===");
+dataMap.forEach((value, key) => {
+    console.log(`${key}: ${value.count} prairies, alt moyenne: ${value.avgAlt}m`);
+});
 
     const regionsNames = regionsData.features.map(f => f.properties.nom.trim());
-    const maxValueRegions = d3.max(regionsNames, name => dataMap.get(name)) || 100;
+    // Corrigé : on cherche le max du champ .count
+    const maxValueRegions = d3.max(regionsNames, name => dataMap.get(name)?.count) || 100;
+  
+    console.log("Max value regions:", maxValueRegions);
+    console.log("Regions names from GeoJSON:", regionsNames);
 
     const projection = d3.geoConicConformal()
       .center([2.2137, 46.2276])
@@ -107,41 +160,42 @@ export function drawMap(svg, tooltip, width, height) {
     function zoomToDept(event, d) {
       event.stopPropagation();
       currentDeptData = d;
-      const deptCode = d.properties.code; 
-      
-      // MISE À JOUR BOUTON : On vient de cliquer sur un département, on veut pouvoir revenir à la Région
-      backButton.style("display", "block").text("← Retour à la Région");
+      // On vient de cliquer sur un département, donc le bouton doit ramener à la RÉGION
+      backButton.text("← Retour à la Région");
+      zoomToFeature(d, 0.8);
+      showArrondissements(d.properties.code);
+    }
 
-      const filteredArrs = arrData.features.filter(f => f.properties.code.startsWith(deptCode));
-      const localMax = d3.max(filteredArrs, f => dataMap.get(f.properties.nom.trim())) || 1;
+    function showArrondissements(deptCode) {
+      deptsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
+
+      const filteredArr = arrData.features.filter(f => f.properties.code.startsWith(deptCode));
+      const localMax = d3.max(filteredArr, f => dataMap.get(f.properties.nom.trim())?.count) || 1;
       const localScale = d3.scaleSequential().domain([0, localMax]).interpolator(d3.interpolateGreens);
 
       updateLegend(localMax, "Valeur par Arrond.");
-      zoomToFeature(d, 0.8);
 
-      deptsLayer.selectAll("path").style("pointer-events", "none").transition().duration(500).style("opacity", 0);
+      const arr = arrLayer.selectAll("path").data(filteredArr, d => d.properties.nom);
 
-      const arrondissements = arrLayer.selectAll("path").data(filteredArrs, d => d.properties.nom);
-
-      arrondissements.enter()
+      arr.enter()
         .append("path")
         .attr("d", path)
         .style("vector-effect", "non-scaling-stroke")
-        .attr("fill", d => localScale(dataMap.get(d.properties.nom.trim()) || 0))
+        .attr("fill", d => localScale(dataMap.get(d.properties.nom.trim())?.count || 0))
         .attr("stroke", "#999")
         .attr("stroke-width", 0.5)
         .style("opacity", 0)
         .on("mouseover", (event, d) => {
-          const name = d.properties.nom.trim();
-          const val = dataMap.get(name) || 0;
+          const name = d.properties.nom;
+          const stats = dataMap.get(name.trim());
           
           // Tooltip riche
           tooltip.style("opacity", 1).html(`
-            <div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${name}</div>
-            <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
-            <div><strong>Prairies :</strong> ${val}</div>
-            <div><strong>Surface :</strong> ${Math.floor(Math.random()*20)} %</div>
-            <div><strong>Altitude :</strong> ${Math.floor(Math.random()*600 + 100)}m</div>
+          <div style="font-weight:bold; font-size:15px;">${name}</div>
+          <hr>
+          <div><strong>Nombre de prairies :</strong> ${stats ? stats.count : 0}</div>
+          <div><strong>Altitude moyenne :</strong> ${stats ? stats.avgAlt : 0} m</div>
+          <div><strong>Surface totale :</strong> ${stats ? Math.round(stats.sumSurf) : 0} ha</div>
           `);
           
           // Bordure noire et mise au premier plan
@@ -174,7 +228,7 @@ export function drawMap(svg, tooltip, width, height) {
       regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
 
       const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
-      const localMax = d3.max(filteredDepts, f => dataMap.get(f.properties.nom.trim())) || 1;
+      const localMax = d3.max(filteredDepts, f => dataMap.get(f.properties.nom.trim())?.count) || 1;
       const localScale = d3.scaleSequential().domain([0, localMax]).interpolator(d3.interpolateGreens);
 
       updateLegend(localMax, "Valeur par Dept");
@@ -185,19 +239,20 @@ export function drawMap(svg, tooltip, width, height) {
         .append("path")
         .attr("d", path)
         .style("vector-effect", "non-scaling-stroke")
-        .attr("fill", d => localScale(dataMap.get(d.properties.nom.trim()) || 0))
+        .attr("fill", d => localScale(dataMap.get(d.properties.nom.trim())?.count || 0))
         .attr("stroke", "#fff")
         .attr("stroke-width", 0.5)
         .style("opacity", 0)
         .on("mouseover", (event, d) => {
           const name = d.properties.nom;
-          const val = dataMap.get(name.trim()) || 0;
-          
+          const stats = dataMap.get(name.trim());
+  
           tooltip.style("opacity", 1).html(`
-            <div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${name}</div>
-            <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
-            <div><strong>Prairies :</strong> ${val}</div>
-            <div><strong>Altitude :</strong> ${Math.floor(Math.random()*400 + 50)}m</div>
+          <div style="font-weight:bold; font-size:15px;">${name}</div>
+          <hr>
+          <div><strong>Nombre de prairies :</strong> ${stats ? stats.count : 0}</div>
+          <div><strong>Altitude moyenne :</strong> ${stats ? stats.avgAlt : 0} m</div>
+          <div><strong>Surface totale :</strong> ${stats ? Math.round(stats.sumSurf) : 0} ha</div>
           `);
           
           d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
@@ -213,7 +268,7 @@ export function drawMap(svg, tooltip, width, height) {
         .transition().duration(500).style("opacity", 1);
         
       deptsLayer.selectAll("path").transition().duration(500)
-        .attr("fill", d => localScale(dataMap.get(d.properties.nom.trim()) || 0))
+        .attr("fill", d => localScale(dataMap.get(d.properties.nom.trim())?.count || 0))
         .style("opacity", 1).style("pointer-events", "all");
     }
 
@@ -226,13 +281,26 @@ export function drawMap(svg, tooltip, width, height) {
       .append("path")
       .attr("d", path)
       .style("vector-effect", "non-scaling-stroke")
-      .attr("fill", d => initialScale(dataMap.get(d.properties.nom.trim()) || 0))
+      .attr("fill", d => {
+        const name = d.properties.nom.trim();
+        const stats = dataMap.get(name);
+        const count = stats?.count || 0;
+        console.log(`Région: ${name}, count: ${count}, color: ${initialScale(count)}`);
+        return initialScale(count);
+      })
       .attr("stroke", "#fff")
       .attr("stroke-width", 1)
       .on("mouseover", (event, d) => {
         const name = d.properties.nom;
-        const val = dataMap.get(name.trim()) || 0;
-        tooltip.style("opacity", 1).html(`<strong>${name}</strong><br>Prairies : ${val}`);
+        const stats = dataMap.get(name.trim());
+        
+        tooltip.style("opacity", 1);
+        tooltip.html(`
+            <strong>Région :</strong> ${name}<br/>
+            <strong>Nombre de parcelles :</strong> ${stats ? stats.count : 0}<br/>
+            <strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m
+        `);
+
         d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
       })
       .on("mousemove", (event) => {
