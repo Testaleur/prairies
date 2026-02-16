@@ -1,4 +1,4 @@
-import { drawMap } from "./map.js";
+import { drawMap } from "./map/drawMap.js";
 
 window.addEventListener('DOMContentLoaded', () => {
     const mapContainer = document.getElementById("map-container");

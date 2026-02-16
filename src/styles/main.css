@@ -1,6 +1,6 @@
-@import "./styles/sidebar.css";
-@import "./styles/map.css";
-@import "./styles/utilities.css";
+@import "./sidebar.css";
+@import "./map.css";
+@import "./utilities.css";
 
 /* --- CONFIGURATION GLOBALE --- */
 body {
