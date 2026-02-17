@@ -1,3 +1,22 @@
+export var currentRegionData = null;
+export var currentDeptData = null;
+
+export function setCurrentRegionData(value) {
+  currentRegionData = value;
+}
+
+export function setCurrentDeptData(value) {
+  currentDeptData = value;
+}
+
+export function getCurrentRegionData() {
+  return currentRegionData;
+}
+
+export function getCurrentDeptData() {
+  return currentDeptData;
+}
+
 export const deptToRegion = {
   "01": "Auvergne-Rhône-Alpes", 
   "03": "Auvergne-Rhône-Alpes", 
