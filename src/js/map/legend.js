@@ -1,4 +1,4 @@
-export function updateLegend(svg, maxValue, label) {
+export function updateLegend(svg, value, label) {
   svg.selectAll(".legend-group").remove();
 
   const legendG = svg.append("g")
@@ -24,7 +24,7 @@ export function updateLegend(svg, maxValue, label) {
     .style("fill", "url(#linear-gradient)");
 
   const yScale = d3.scaleLinear()
-    .domain([0, maxValue])
+    .domain([0, value])
     .range([150, 0]);
 
   legendG.append("g")

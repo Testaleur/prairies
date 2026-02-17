@@ -26,6 +26,10 @@ export function drawMap(svg, tooltip, width, height) {
     // global map data
     const regionsNames = regionsData.features.map(f => f.properties.nom.trim());
     const maxValueRegions = d3.max(regionsNames, name => currentDataMap.get(name)?.count) || 100;
+    const maxSurfaceRegions = d3.max(regionsNames, name => currentDataMap.get(name)?.surface) || 100;
+    const selectedDisplay = document.getElementById("affichage-type-select").value;
+    const selectedMax = selectedDisplay === "NB" ? maxValueRegions : maxSurfaceRegions;
+    const label = selectedDisplay === "NB" ? "Nombre de prairies" : "Surface de prairies (ha)";
 
     // initiate map elements
     const projection = d3.geoConicConformal()
@@ -40,12 +44,12 @@ export function drawMap(svg, tooltip, width, height) {
     const zoom = d3.zoom()
     .scaleExtent([1, 40])
     .on("zoom", (event) => g.attr("transform", event.transform));
-    const initialScale = d3.scaleSequential().domain([0, maxValueRegions]).interpolator(d3.interpolateGreens);
+    const initialScale = d3.scaleSequential().domain([0, selectedMax]).interpolator(d3.interpolateGreens);
     
     // create button, legend, sidebar
     const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData);
-    updateLegend(svg, maxValueRegions, "Valeur par Région");
-    createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData);
+    updateLegend(svg, selectedMax, label);
+    createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer);
     
     // start with drawing regions
     showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData);

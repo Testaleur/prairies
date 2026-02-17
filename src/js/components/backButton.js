@@ -73,8 +73,13 @@ export function createBackButton(
 
       const maxVal =
         d3.max(regionsNames, n => currentDataMap.get(n)?.count) || 100;
+      const maxSurface =
+        d3.max(regionsNames, n => currentDataMap.get(n)?.surface) || 100;
+      const selectedDisplay = document.getElementById("affichage-type-select").value;
+      const selectedMax = selectedDisplay === "NB" ? maxVal : maxSurface;
+      const label = selectedDisplay === "NB" ? "Nombre de prairies" : "Surface de prairies (ha)";
 
-      updateLegend(svg, maxVal, "Valeur par Région");
+      updateLegend(svg, selectedMax, label);
 
       regionsLayer.selectAll("path")
         .transition()

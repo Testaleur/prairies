@@ -15,11 +15,11 @@ export function processData(allParcelles, filterValue, regCodeToName, deptCodeTo
 
     const updateStats = (name) => {
       if (!name) return;
-      if (!dataMap.has(name)) dataMap.set(name, { count: 0, sumAlt: 0, sumSurf: 0 });
+      if (!dataMap.has(name)) dataMap.set(name, { count: 0, sumAlt: 0, surface: 0 });
       const s = dataMap.get(name);
       s.count++;
       s.sumAlt += alt;
-      s.sumSurf += surf;
+      s.surface += Math.round(surf);
     };
 
     updateStats(regName);
