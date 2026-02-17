@@ -1,6 +1,10 @@
 import { updateLegend } from "./legend";
 import { zoomToDept} from "./interactions";
 
+export function showRegion(){
+  
+}
+
 export function showDepartments(regionName, regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData) {
   console.log("showing departments for region:", regionName);
   console.log(regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData);
