@@ -47,7 +47,6 @@ export function createBackButton(
       arrLayer.selectAll("path").remove();
       const region = getCurrentRegionData();
       if (region) {
-        zoomToFeature(path, svg, zoom, region, 0.8);
         showDepartments(
           region.properties.nom, 
           regionsLayer,
@@ -62,8 +61,9 @@ export function createBackButton(
           zoom,
           arrLayer,
           arrData)
+        }
+        zoomToFeature(path, svg, zoom, region, 0.8);
       }
-    }
 
     else {
       backButton.style("display", "none");

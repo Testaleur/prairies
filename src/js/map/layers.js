@@ -4,18 +4,21 @@ import { zoomToDept} from "./interactions";
 export function showDepartments(regionName, regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData) {
   console.log("showing departments for region:", regionName);
   console.log(regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData);
+  
   regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
   const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
   const localMax = d3.max(filteredDepts, f => currentDataMap.get(f.properties.nom.trim())?.count) || 1;
   const localScale = d3.scaleSequential().domain([0, localMax]).interpolator(d3.interpolateGreens);
   updateLegend(svg, localMax, "Valeur par Dept");
-
+  
   const depts = deptsLayer.selectAll("path").data(filteredDepts, d => d.properties.nom);
-  depts.enter()
-    .append("path")
+  console.log(depts);
+  const paths = depts.join("path")
     .attr("d", path)
     .style("vector-effect", "non-scaling-stroke")
-    .attr("fill", d => localScale(currentDataMap.get(d.properties.nom.trim())?.count || 0))
+    .attr("fill", d => {
+      return localScale(currentDataMap.get(d.properties.nom.trim())?.count || 0);
+    })
     .attr("stroke", "#fff")
     .attr("stroke-width", 0.5)
     .style("opacity", 0)
