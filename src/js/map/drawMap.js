@@ -1,9 +1,9 @@
 import { deptToRegion, regCodeToName, deptCodeToName, getCurrentRegionData } from "../config.js";
 import { processData } from "./dataProcessing.js";
 import { updateLegend } from "./legend.js";
-import { clicked } from "./interactions.js";
 import { createBackButton } from "../components/backButton.js";
 import { createSidebar } from "../components/sidebar.js";
+import { showRegions } from "./layers.js";
 
 // Variables globales pour le filtrage
 let allParcelles = []; 
@@ -48,35 +48,6 @@ export function drawMap(svg, tooltip, width, height) {
     createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData);
     
     // start with drawing regions
-    regionsLayer.selectAll("path")
-    .data(regionsData.features)
-    .enter()
-    .append("path")
-    .attr("d", path)
-    .style("vector-effect", "non-scaling-stroke")
-    .attr("fill", d => initialScale(currentDataMap.get(d.properties.nom.trim())?.count || 0))
-    .attr("stroke", "#fff")
-    .attr("stroke-width", 1)
-    .on("mouseover", (event, d) => {
-      const name = d.properties.nom;
-      const stats = currentDataMap.get(name.trim());
-      tooltip.style("opacity", 1).html(`
-        <strong>Région :</strong> ${name}<br/>
-        <strong>Nombre :</strong> ${stats ? stats.count : 0}<br/>
-        <strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m
-        `);
-        d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
-      })
-      .on("mousemove", (event) => {
-          tooltip.style("left", (event.pageX + 10) + "px").style("top", (event.pageY + 10) + "px");
-        })
-        .on("mouseout", (event) => {
-          tooltip.style("opacity", 0);
-          d3.select(event.currentTarget).attr("stroke", "#fff").attr("stroke-width", 1);
-        })
-        .on("click", (event, d) => {
-          clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData);
-        });
-
+    showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData);
   });
 }
