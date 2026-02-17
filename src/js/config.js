@@ -1,22 +1,23 @@
+export const strokeColor = "#000"; // "#fff"
+export const strokeWidth = 0.5; // 1
+
+// États actuels les données affichées
 export var currentRegionData = null;
 export var currentDeptData = null;
-
 export function setCurrentRegionData(value) {
   currentRegionData = value;
 }
-
 export function setCurrentDeptData(value) {
   currentDeptData = value;
 }
-
 export function getCurrentRegionData() {
   return currentRegionData;
 }
-
 export function getCurrentDeptData() {
   return currentDeptData;
 }
 
+// Mappings pour les régions et départements
 export const deptToRegion = {
   "01": "Auvergne-Rhône-Alpes", 
   "03": "Auvergne-Rhône-Alpes", 
