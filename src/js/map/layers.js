@@ -8,7 +8,13 @@ import { deptToRegion, strokeColor, strokeWidth } from "../config.js";
 // Afficher les régions
 export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData) {
   const propertyToUse = document.getElementById("affichage-type-select").value === "NB" ? "count" : "surface";
-  
+  const format = d3.formatLocale({
+    decimal: ",",
+    thousands: " ",
+    grouping: [3],
+    currency: ["", " €"]
+  }).format(",");
+
   regionsLayer.selectAll("path")
     .data(regionsData.features)
     .enter()
@@ -23,8 +29,8 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
       const stats = currentDataMap.get(name.trim());
       tooltip.style("opacity", 1).html(`
         <strong>Région :</strong> ${name}<br/>
-        <strong>Nombre :</strong> ${stats ? stats.count : 0}<br/>
-        <strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha<br/>
+        <strong>Nombre :</strong> ${stats ? format(stats.count) : 0}<br/>
+        <strong>Surface de prairies :</strong> ${stats ? format(stats.surface) : 0} ha<br/>
         <strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m
         `);
         d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
