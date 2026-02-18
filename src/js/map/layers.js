@@ -59,11 +59,12 @@ export function showDepartments(regionName, regionsLayer, deptsData, deptToRegio
   const propertyToUse = selectedDisplay === "NB" ? "count" : "surface";
   const localScale = d3.scaleSequential().domain([0, selectedMax]).interpolator(d3.interpolateGreens);
   updateLegend(svg, selectedMax, label);
-  
+
   const depts = deptsLayer.selectAll("path").data(filteredDepts, d => d.properties.nom);
   const paths = depts.join("path")
     .attr("d", path)
     .style("vector-effect", "non-scaling-stroke")
+    .style("pointer-events", "all")
     .attr("fill", d => {
       return localScale(currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0);
     })
