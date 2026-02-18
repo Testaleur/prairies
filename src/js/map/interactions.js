@@ -1,5 +1,5 @@
 import { showDepartments, showArrondissements } from "./layers.js";
-import { setCurrentDeptData, setCurrentRegionData } from "../config.js";
+import { setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
@@ -14,6 +14,7 @@ export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
 
 export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData) {
   setCurrentRegionData(d);
+  setCurrentView("REGION");
   backButton.style("display", "block").text("← Retour à la France");
   if (event) event.stopPropagation();
   zoomToFeature(path, svg, zoom, d, 0.7);
@@ -35,6 +36,7 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
 
 export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer) {
   setCurrentDeptData(d);
+  setCurrentView("DEPARTEMENT");
   event.stopPropagation();
   backButton.text("← Retour à la Région");
   zoomToFeature(path, svg, zoom, d, 0.8);
@@ -51,6 +53,7 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
 }
 
 export function zoomToArr(event, d, backButton) {
+  setCurrentView("ARRONDISSEMENT");
   event.stopPropagation();
   backButton.text("← Retour au Département");
   zoomToFeature(path, svg, zoom, d, 0.9);

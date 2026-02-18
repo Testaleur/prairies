@@ -1,4 +1,4 @@
-import { updateLegend } from "./legend";
+import { updateLegend } from "../components/legend.js";
 import { zoomToDept} from "./interactions";
 import { clicked } from "./interactions";
 import { deptToRegion, strokeColor, strokeWidth } from "../config.js";

@@ -17,6 +17,15 @@ export function getCurrentDeptData() {
   return currentDeptData;
 }
 
+// état de la vue affichée
+export let currentView = "FRANCE";
+export function setCurrentView(v) {
+  currentView = v;
+}
+export function getCurrentView() {
+  return currentView;
+}
+
 // Mappings pour les régions et départements
 export const deptToRegion = {
   "01": "Auvergne-Rhône-Alpes", 

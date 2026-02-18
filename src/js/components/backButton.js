@@ -1,7 +1,7 @@
-import { updateLegend } from "../map/legend.js";
+import { updateLegend } from "./legend.js";
 import { showDepartments } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
-import { setCurrentRegionData, getCurrentRegionData } from "../config.js";
+import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView } from "../config.js";
 
 export function createBackButton(
   arrLayer,
@@ -32,7 +32,8 @@ export function createBackButton(
   function reset() {
     const currentText = backButton.text();
 
-    if (currentText === "← Retour au Département") {
+    if (getCurrentView() === "ARRONDISSEMENT") {
+      setCurrentView("DEPARTEMENT");
       backButton.text("← Retour à la Région");
       arrLayer.selectAll("path")
         .transition()
@@ -42,7 +43,8 @@ export function createBackButton(
       zoomToFeature(path, svg, zoom, 0.8);
     }
 
-    else if (currentText === "← Retour à la Région") {
+    else if (getCurrentView() === "DEPARTEMENT") {
+      setCurrentView("REGION");
       backButton.text("← Retour à la France");
       arrLayer.selectAll("path").remove();
       const region = getCurrentRegionData();
@@ -65,7 +67,8 @@ export function createBackButton(
         zoomToFeature(path, svg, zoom, region, 0.8);
       }
 
-    else {
+    else { // currentView is FRANCE
+      setCurrentView("FRANCE");
       backButton.style("display", "none");
 
       arrLayer.selectAll("path").remove();

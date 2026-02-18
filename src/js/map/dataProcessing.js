@@ -1,5 +1,7 @@
+import { regCodeToName, deptCodeToName } from "../config.js";
+
 // --- FONCTION DE TRAITEMENT DES DONNÉES ---
-export function processData(allParcelles, filterValue, regCodeToName, deptCodeToName) {
+export function processData(allParcelles, filterValue ) {
   const dataMap = new Map();
   const filtered = filterValue === "ALL"
     ? allParcelles
@@ -13,20 +15,20 @@ export function processData(allParcelles, filterValue, regCodeToName, deptCodeTo
     const alt = +p.alt_mean || 0;
     const surf = +p.SURF_PARC || 0;
 
-    const updateStats = (name) => {
-      if (!name) return;
-      if (!dataMap.has(name)) dataMap.set(name, { count: 0, sumAlt: 0, surface: 0 });
-      const s = dataMap.get(name);
-      s.count++;
-      s.sumAlt += alt;
-      s.surface += Math.round(surf);
-    };
-
-    updateStats(regName);
-    updateStats(deptName);
+    updateStats(dataMap, regName, alt, surf);
+    updateStats(dataMap, deptName, alt, surf);
   });
 
   dataMap.forEach(v => v.avgAlt = v.count ? Math.round(v.sumAlt / v.count) : 0);
 
   return dataMap;
 }
+
+function updateStats(dataMap, name, alt, surf) {
+  if (!name) return;
+  if (!dataMap.has(name)) dataMap.set(name, { count: 0, sumAlt: 0, surface: 0 });
+  const s = dataMap.get(name);
+  s.count++;
+  s.sumAlt += alt;
+  s.surface += Math.round(surf);
+};

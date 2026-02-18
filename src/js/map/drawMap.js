@@ -1,6 +1,6 @@
-import { deptToRegion, regCodeToName, deptCodeToName, getCurrentRegionData } from "../config.js";
+import { deptToRegion } from "../config.js";
 import { processData } from "./dataProcessing.js";
-import { updateLegend } from "./legend.js";
+import { updateLegend } from "../components/legend.js";
 import { createBackButton } from "../components/backButton.js";
 import { createSidebar } from "../components/sidebar.js";
 import { showRegions } from "./layers.js";
@@ -21,7 +21,7 @@ export function drawMap(svg, tooltip, width, height) {
   ]).then(([regionsData, deptsData, arrData, parcellesData]) => {
     
     allParcelles = parcellesData;
-    currentDataMap = processData(allParcelles, "ALL", regCodeToName, deptCodeToName);
+    currentDataMap = processData(allParcelles, "ALL");
 
     // global map data
     const regionsNames = regionsData.features.map(f => f.properties.nom.trim());

@@ -1,2 +1,10 @@
-dev le dessin qu'on a fait
+// urgent, partie principale du projet
+rajouter les prairies dans les arrondissement + permettre le zoom + flèches selon pente + gradient altitude
+
+// urgent, fonctionnalités nécessaires
+filtres, boutons et curseur du panneau à droite
 ajouter des petits graphes genre temporel, bar chart...
+adapter les données du tooltip selon ce qui est filtré
+
+// moins urgent
+supprimer les data inutiles
