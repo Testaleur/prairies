@@ -10,6 +10,7 @@ export function processData(allParcelles, filterValue ) {
   filtered.forEach(p => {
     const regCode = String(p.reg_parc || '').trim().split('.')[0];
     const deptCode = String(p.dep_parc || '').trim().padStart(2, '0');
+    const arrCode = String(p.arr_parc || '').trim().padStart(3, '0');
     const regName = regCodeToName[regCode];
     const deptName = deptCodeToName[deptCode];
     const alt = +p.alt_mean || 0;
@@ -17,6 +18,7 @@ export function processData(allParcelles, filterValue ) {
 
     updateStats(dataMap, regName, alt, surf);
     updateStats(dataMap, deptName, alt, surf);
+    updateStats(dataMap, arrCode, alt, surf);
   });
 
   dataMap.forEach(v => v.avgAlt = v.count ? Math.round(v.sumAlt / v.count) : 0);

@@ -1,4 +1,4 @@
-import { getCurrentRegionData, getCurrentView } from "../config";
+import { getCurrentRegionData, getCurrentView, getCurrentDeptData } from "../config";
 import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
 
@@ -12,6 +12,8 @@ export function createSidebar(
   deptToRegion,
   svg,
   deptsLayer,
+  arrData,
+  arrLayer
 ) {
 
   function updateVisualization() {
@@ -38,57 +40,65 @@ export function createSidebar(
         : "Surface de prairies (ha)";
 
     const currentView = getCurrentView();
-        
-    if (currentView === "REGION") {
-      const currentRegionData = getCurrentRegionData();
+
+    const currentRegionData = getCurrentRegionData();
+    if(currentRegionData){
       const regionName = currentRegionData.properties.nom;
 
-    const filteredDepts = deptsData.features.filter(
-      f => deptToRegion[f.properties.code] === regionName
-    );
-
-    const localMax =
-      d3.max(
-        filteredDepts,
-        f => currentDataMap.get(f.properties.nom.trim())?.[propertyToUse]
-      ) || 1;
-
-    const localScale = d3.scaleSequential()
-      .domain([0, localMax])
-      .interpolator(d3.interpolateGreens);
-
-    updateLegend(svg, localMax, label);
-
-    deptsLayer.selectAll("path")
-      .transition()
-      .duration(500)
-      .attr("fill", d =>
-        localScale(
-          currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0
-        )
+      const filteredDepts = deptsData.features.filter(
+        f => deptToRegion[f.properties.code] === regionName
       );
 
-    // update regions layer as well
-    regionsLayer.selectAll("path")
-      .transition()
-      .duration(500)
-      .attr("fill", d =>
-        regionScale(
-          currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0
-        )
-      );
+      var newMaxDep =
+        d3.max(
+          filteredDepts,
+          f => currentDataMap.get(f.properties.nom.trim())?.[propertyToUse]
+        ) || 1;
 
-    } else {
+      var depScale = d3.scaleSequential()
+        .domain([0, newMaxDep])
+        .interpolator(d3.interpolateGreens);
+    }
+
+    const currentDeptData = getCurrentDeptData();
+    if(currentDeptData){
+      const filteredArr = arrData.features.filter(f => {
+        const arrCode = f.properties.code;
+        const depCode = arrCode.slice(0, 2);
+        return depCode === currentDeptData.properties.code;
+      });
+
+      console.log("filtered arrondissements:", filteredArr);
+
+      var newMaxArr =
+        d3.max(
+          filteredArr,
+          f => currentDataMap.get(f.properties.code)?.[propertyToUse]
+        ) || 1;
+
+      console.log("newMaxArr:", newMaxArr);
+
+      var arrScale = d3.scaleSequential()
+        .domain([0, newMaxArr])
+        .interpolator(d3.interpolateGreens);
+    }
+        
+    if (currentView === "REGION") {
+
+      updateLegend(svg, newMaxDep, label);
+      updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse)
+      updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse);
+    
+    } else if (currentView === "DEPARTEMENT") {
+
+      updateLegend(svg, newMaxArr, label);
+      updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse);
+      updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse);
+      updateArrLayer(arrLayer, currentDataMap, arrScale, propertyToUse);
+
+    } else if (currentView === "FRANCE") {
       updateLegend(svg, newMaxRegion, label);
-
-      regionsLayer.selectAll("path")
-        .transition()
-        .duration(500)
-        .attr("fill", d =>
-          regionScale(
-            currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0
-          )
-        );
+      updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse);
     }
   }
 
@@ -97,4 +107,37 @@ export function createSidebar(
 
   // Display mode change (NB / SURFACE)
   d3.select("#affichage-type-select").on("change", updateVisualization);
+}
+
+function updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse) {
+  regionsLayer.selectAll("path")
+    .transition()
+    .duration(500)
+    .attr("fill", d =>
+      regionScale(
+        currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0
+      )
+    );
+}
+
+function updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse) {
+  deptsLayer.selectAll("path")
+    .transition()
+    .duration(500)
+    .attr("fill", d =>
+      depScale(
+        currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0
+      )
+    );
+}
+
+function updateArrLayer(arrLayer, currentDataMap, arrScale, propertyToUse) {
+  arrLayer.selectAll("path")
+    .transition()
+    .duration(500)
+    .attr("fill", d =>
+      arrScale(
+        currentDataMap.get(d.properties.code)?.[propertyToUse] || 0
+      )
+    );
 }
