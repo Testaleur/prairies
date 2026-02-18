@@ -4,17 +4,24 @@ export const strokeWidth = 0.5; // 1
 // États actuels les données affichées
 export var currentRegionData = null;
 export var currentDeptData = null;
+export var currentArrData = null;
 export function setCurrentRegionData(value) {
   currentRegionData = value;
 }
 export function setCurrentDeptData(value) {
   currentDeptData = value;
 }
+export function setCurrentArrData(value) {
+  currentArrData = value;
+} 
 export function getCurrentRegionData() {
   return currentRegionData;
 }
 export function getCurrentDeptData() {
   return currentDeptData;
+}
+export function getCurrentArrData() {
+  return currentArrData;
 }
 
 // état de la vue affichée

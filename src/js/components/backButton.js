@@ -1,7 +1,7 @@
 import { updateLegend } from "./legend.js";
-import { showDepartments } from "../map/layers.js";
+import { showDepartments, showArrondissements } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
-import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView } from "../config.js";
+import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
 
 export function createBackButton(
   arrLayer,
@@ -35,12 +35,23 @@ export function createBackButton(
     if (getCurrentView() === "ARRONDISSEMENT") {
       setCurrentView("DEPARTEMENT");
       backButton.text("← Retour à la Région");
-      arrLayer.selectAll("path")
-        .transition()
-        .duration(500)
-        .style("opacity", 1);
-
-      zoomToFeature(path, svg, zoom, 0.8);
+      arrLayer.selectAll("path").remove();
+      const dept = getCurrentDeptData();
+      if (dept) {
+        showArrondissements(
+          dept.properties.code,
+          backButton,
+          deptsLayer,
+          arrLayer,
+          arrData,
+          currentDataMap,
+          svg,
+          path,
+          tooltip,
+          zoom);
+      }
+      zoomToFeature(path, svg, zoom, dept, 0.9);
+      setCurrentArrData(null);
     }
 
     else if (getCurrentView() === "DEPARTEMENT") {
@@ -65,9 +76,10 @@ export function createBackButton(
           arrData)
         }
         zoomToFeature(path, svg, zoom, region, 0.8);
+        setCurrentDeptData(null)
       }
 
-    else { // currentView is FRANCE
+    else if (getCurrentView() === "REGION") {
       setCurrentView("FRANCE");
       backButton.style("display", "none");
 

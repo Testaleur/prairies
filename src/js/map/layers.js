@@ -1,5 +1,5 @@
 import { updateLegend } from "../components/legend.js";
-import { zoomToDept} from "./interactions";
+import { zoomToDept, zoomToArr } from "./interactions";
 import { clicked } from "./interactions";
 import { deptToRegion, strokeColor, strokeWidth } from "../config.js";
 
@@ -97,9 +97,7 @@ export function showDepartments(regionName, regionsLayer, deptsData, deptToRegio
 }
 
 // Afficher les arrondissements d'un département
-export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, arrData, currentDataMap, svg, path, tooltip) {
-  console.log("Affichage des arrondissements pour le département", deptCode);
-
+export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, arrData, currentDataMap, svg, path, tooltip, zoom) {
   deptsLayer.selectAll("path")
     .transition().duration(500)
     .style("opacity", 0)
@@ -156,7 +154,7 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
       tooltip.style("opacity", 0);
       d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
     })
-    .on("click", (event, d) => zoomToArr(event, d, backButton))
+    .on("click", (event, d) => zoomToArr(event, d, backButton, path, svg, zoom, arrLayer))
     .transition().duration(500)
     .style("opacity", 1);
 }

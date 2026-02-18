@@ -1,5 +1,5 @@
 import { showDepartments, showArrondissements } from "./layers.js";
-import { setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
+import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
@@ -49,10 +49,12 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
     currentDataMap,
     svg,
     path,
-    tooltip);
+    tooltip,
+    zoom);
 }
 
-export function zoomToArr(event, d, backButton) {
+export function zoomToArr(event, d, backButton, path, svg, zoom, arrLayer) {
+  setCurrentArrData(d);
   setCurrentView("ARRONDISSEMENT");
   event.stopPropagation();
   backButton.text("← Retour au Département");
