@@ -1,42 +1,61 @@
-export function updateHistogram(data) {
+const labelsTraduction = {
+    "PPH": "Prairies permanentes",
+    "SPH": "Surfaces pastorales (herbe)",
+    "SPL": "Surfaces pastorales (fourrage)",
+    "CAE": "Châtaigneraie",
+    "CEE": "Chênaie"
+};
+
+// Ajout de l'argument 'zoneName'
+export function updateHistogram(data, zoneName = "France") {
+    // 1. Mettre à jour le titre textuel
+    d3.select("#histogram-section h3")
+      .text(`Répartition par type de prairie - ${zoneName}`);
+
     const container = d3.select("#histogram-container");
     const width = container.node().clientWidth;
-    const height = container.node().clientHeight || 200; // Utilise la hauteur du CSS
-    const margin = {top: 20, right: 30, bottom: 50, left: 60};
+    const height = 350; 
+    const margin = {top: 20, right: 30, bottom: 100, left: 60};
 
-    container.selectAll("*").remove(); // Nettoyage
+    container.selectAll("*").remove();
 
     const svg = container.append("svg")
         .attr("width", width)
         .attr("height", height);
 
+    const formattedData = data.map(d => ({
+        type: labelsTraduction[d.type] || d.type,
+        count: d.count
+    }));
+
     const x = d3.scaleBand()
-        .domain(data.map(d => d.type))
+        .domain(formattedData.map(d => d.type))
         .range([margin.left, width - margin.right])
         .padding(0.3);
 
     const y = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.count) || 1]).nice()
+        .domain([0, d3.max(formattedData, d => d.count) || 1]).nice()
         .range([height - margin.bottom, margin.top]);
 
-    // Dessin des barres
+    // Barres
     svg.append("g")
         .selectAll("rect")
-        .data(data)
+        .data(formattedData)
         .join("rect")
         .attr("x", d => x(d.type))
         .attr("y", d => y(d.count))
         .attr("width", x.bandwidth())
         .attr("height", d => y(0) - y(d.count))
-        .attr("fill", "#27ae60"); // Vert assorti à ton bouton retour
+        .attr("fill", "#27ae60");
 
-    // Axe X
+    // Axe X avec rotation pour la lisibilité
     svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(x))
         .selectAll("text")
-        .attr("transform", "rotate(-15)") // Incline les textes si les noms sont longs
-        .style("text-anchor", "end");
+        .attr("transform", "rotate(-25)") // Inclinaison pour éviter que les noms se chevauchent
+        .style("text-anchor", "end")
+        .style("font-size", "12px");
 
     // Axe Y
     svg.append("g")
