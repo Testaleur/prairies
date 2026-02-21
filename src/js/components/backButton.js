@@ -2,6 +2,7 @@ import { updateLegend } from "./legend.js";
 import { showDepartments, showArrondissements } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
+import { updateHistogram } from "./histogram.js";
 
 export function createBackButton(
   arrLayer,
@@ -49,6 +50,12 @@ export function createBackButton(
           path,
           tooltip,
           zoom);
+        if (window.allParcellesData) {
+          const deptCode = String(dept.properties.code);
+          const filtered = window.allParcellesData.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
+          const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
+          updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), dept.properties.nom);
+        }
       }
       zoomToFeature(path, svg, zoom, dept, 0.9);
       setCurrentArrData(null);
@@ -74,6 +81,12 @@ export function createBackButton(
           zoom,
           arrLayer,
           arrData)
+        if (window.allParcellesData) {
+          const regionCode = String(region.properties.code);
+          const filtered = window.allParcellesData.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
+          const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
+          updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), region.properties.nom);
+        }
         }
         zoomToFeature(path, svg, zoom, region, 0.8);
         setCurrentDeptData(null)
@@ -86,8 +99,6 @@ export function createBackButton(
       arrLayer.selectAll("path").remove();
       deptsLayer.selectAll("path").remove();
 
-      
-
       const maxVal =
         d3.max(regionsNames, n => currentDataMap.get(n)?.count) || 100;
       const maxSurface =
@@ -97,6 +108,11 @@ export function createBackButton(
       const label = selectedDisplay === "NB" ? "Nombre de prairies" : "Surface de prairies (ha)";
 
       updateLegend(svg, selectedMax, label);
+
+      if (window.allParcellesData) {
+        const counts = d3.rollup(window.allParcellesData, v => v.length, d => d.CODE_CULTU);
+        updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), "France");
+      }
 
       regionsLayer.selectAll("path")
         .transition()
