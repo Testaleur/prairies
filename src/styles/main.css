@@ -18,3 +18,10 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+#map-container {
+    flex: 1; /* Prend tout l'espace restant à gauche de la sidebar */
+    display: flex;
+    flex-direction: column; /* Empile Map + Histogramme verticalement */
+    height: 100%;
+}

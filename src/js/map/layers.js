@@ -6,7 +6,8 @@ import { deptToRegion, strokeColor, strokeWidth } from "../config.js";
 // gestion de l'affichage des différentes couches de la carte : régions, départements, arrondissements
 
 // Afficher les régions
-export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData) {
+// Ajoute allParcelles à la fin de la liste des paramètres
+export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles) {
   const propertyToUse = document.getElementById("affichage-type-select").value === "NB" ? "count" : "surface";
   const format = d3.formatLocale({
     decimal: ",",
@@ -42,9 +43,7 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
         tooltip.style("opacity", 0);
         d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
       })
-      .on("click", (event, d) => {
-        clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData);
-      });
+      .on("click", (event, d) => clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData, allParcelles)) // Ajoute allParcelles ici
 }
 
 // Afficher les départements d'une région

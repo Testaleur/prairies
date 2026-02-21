@@ -17,18 +17,20 @@
 
 /* --- ZONE DE LA CARTE --- */
 #map-container {
-  flex-grow: 1; /* Prend tout l'espace restant à gauche */
-  position: relative;
-  background-color: #f0f2f5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    flex-grow: 1;
+    position: relative;
+    background-color: #f0f2f5;
+    /* On enlève le display: flex et la direction column */
+    overflow-y: auto; /* Permet le scroll vertical uniquement ici */
+    height: 100vh;    /* Prend toute la hauteur de l'écran */
 }
 
 #map {
   width: 100%;
   height: 100%;
   display: flex;
+  flex: 2; /* La carte prend environ 2/3 de la hauteur */
+  position: relative;
   justify-content: center;
   align-items: center;
 }
@@ -49,4 +51,18 @@ path {
 .legend-group text {
   font-family: sans-serif;
   fill: #502c2c;
+}
+
+#histogram-section {
+    flex: 1; /* L'histogramme prend le 1/3 restant */
+    background: white;
+    border-top: 2px solid #ccc;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#histogram-container {
+    width: 100%;
+    height: 100%; /* D3.js utilisera cet espace pour dessiner */
 }

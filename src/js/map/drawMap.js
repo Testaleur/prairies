@@ -4,6 +4,7 @@ import { updateLegend } from "../components/legend.js";
 import { createBackButton } from "../components/backButton.js";
 import { createSidebar } from "../components/sidebar.js";
 import { showRegions } from "./layers.js";
+import { updateHistogram } from "../components/histogram.js";
 
 // Variables globales pour le filtrage
 let allParcelles = []; 
@@ -21,6 +22,13 @@ export function drawMap(svg, tooltip, width, height) {
   ]).then(([regionsData, deptsData, arrData, parcellesData]) => {
     
     allParcelles = parcellesData;
+    // Compte les parcelles par CODE_CULTU
+    const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);
+    const histoData = Array.from(counts, ([type, count]) => ({ type, count }));
+
+    // Affiche l'histogramme initial
+    updateHistogram(histoData);
+
     currentDataMap = processData(allParcelles, "ALL");
 
     // global map data
@@ -52,6 +60,6 @@ export function drawMap(svg, tooltip, width, height) {
     createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer);
     
     // start with drawing regions
-    showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData);
+    showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles);
   });
 }

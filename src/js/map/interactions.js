@@ -1,5 +1,6 @@
 import { showDepartments, showArrondissements } from "./layers.js";
 import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
+import { updateHistogram } from "../components/histogram.js";
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
@@ -12,7 +13,7 @@ export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   );
 }
 
-export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData) {
+export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData, allParcelles) {
   setCurrentRegionData(d);
   setCurrentView("REGION");
   backButton.style("display", "block").text("← Retour à la France");
@@ -32,6 +33,18 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
     zoom, 
     arrLayer, 
     arrData);
+    if (allParcelles) {
+        // Filtrer les parcelles pour la région cliquée
+        const regionCode = String(d.properties.code);
+        const regionData = allParcelles.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
+        
+        // Compter par type (CODE_CULTU)
+        const counts = d3.rollup(regionData, v => v.length, d => d.CODE_CULTU);
+        const histoData = Array.from(counts, ([type, count]) => ({ type, count }));
+        
+        // Mettre à jour le graphique
+        updateHistogram(histoData);
+    }
 }
 
 export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer) {
