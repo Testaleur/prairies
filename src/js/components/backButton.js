@@ -86,6 +86,8 @@ export function createBackButton(
       arrLayer.selectAll("path").remove();
       deptsLayer.selectAll("path").remove();
 
+      
+
       const maxVal =
         d3.max(regionsNames, n => currentDataMap.get(n)?.count) || 100;
       const maxSurface =

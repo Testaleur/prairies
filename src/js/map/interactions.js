@@ -33,18 +33,13 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
     zoom, 
     arrLayer, 
     arrData);
-    if (allParcelles) {
-        // Filtrer les parcelles pour la région cliquée
-        const regionCode = String(d.properties.code);
-        const regionData = allParcelles.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
-        
-        // Compter par type (CODE_CULTU)
-        const counts = d3.rollup(regionData, v => v.length, d => d.CODE_CULTU);
-        const histoData = Array.from(counts, ([type, count]) => ({ type, count }));
-        
-        // Mettre à jour le graphique
-        updateHistogram(histoData);
-    }
+    if (window.allParcellesData) {
+    const regionCode = String(d.properties.code);
+    // On filtre les données globales stockées dans window
+    const filtered = window.allParcellesData.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
+    const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
+    updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
+}
 }
 
 export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer) {

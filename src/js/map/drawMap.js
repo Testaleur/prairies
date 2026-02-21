@@ -22,12 +22,8 @@ export function drawMap(svg, tooltip, width, height) {
   ]).then(([regionsData, deptsData, arrData, parcellesData]) => {
     
     allParcelles = parcellesData;
-    // Compte les parcelles par CODE_CULTU
-    const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);
-    const histoData = Array.from(counts, ([type, count]) => ({ type, count }));
-
-    // Affiche l'histogramme initial
-    updateHistogram(histoData);
+    window.allParcellesData = parcellesData;
+    
 
     currentDataMap = processData(allParcelles, "ALL");
 
@@ -58,6 +54,11 @@ export function drawMap(svg, tooltip, width, height) {
     const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData);
     updateLegend(svg, selectedMax, label);
     createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer);
+
+    // À mettre juste avant la fin du .then(([regionsData, ...]))
+    const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);
+    const initialData = Array.from(counts, ([type, count]) => ({ type, count }));
+    updateHistogram(initialData, "France");
     
     // start with drawing regions
     showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles);
