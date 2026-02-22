@@ -13,7 +13,6 @@ let currentDataMap = new Map();
 export function drawMap(svg, tooltip, width, height) {
   const BASE_URL = import.meta.env.BASE_URL;
 
-  // get data
   Promise.all([
     d3.json(`${BASE_URL}regions.geojson`),
     d3.json(`${BASE_URL}departements.geojson`),
@@ -23,11 +22,24 @@ export function drawMap(svg, tooltip, width, height) {
     
     allParcelles = parcellesData;
     window.allParcellesData = parcellesData;
-    
 
-    currentDataMap = processData(allParcelles, "ALL");
+    // --- Initialisation des sliders d'altitude ---
+    const alts = parcellesData.map(p => +p.alt_mean).filter(a => !isNaN(a));
+    const minPossible = Math.floor(d3.min(alts) || 0);
+    const maxPossible = Math.ceil(d3.max(alts) || 3000);
 
-    // global map data
+    const minSlider = document.getElementById("alt-min-slider");
+    const maxSlider = document.getElementById("alt-max-slider");
+
+    minSlider.min = minPossible; minSlider.max = maxPossible; minSlider.value = minPossible;
+    maxSlider.min = minPossible; maxSlider.max = maxPossible; maxSlider.value = maxPossible;
+
+    document.getElementById("alt-min-display").innerText = minPossible;
+    document.getElementById("alt-max-display").innerText = maxPossible;
+
+    currentDataMap = processData(allParcelles, "ALL", minPossible, maxPossible);
+
+    // --- Données carte ---
     const regionsNames = regionsData.features.map(f => f.properties.nom.trim());
     const maxValueRegions = d3.max(regionsNames, name => currentDataMap.get(name)?.count) || 100;
     const maxSurfaceRegions = d3.max(regionsNames, name => currentDataMap.get(name)?.surface) || 100;
@@ -35,7 +47,7 @@ export function drawMap(svg, tooltip, width, height) {
     const selectedMax = selectedDisplay === "NB" ? maxValueRegions : maxSurfaceRegions;
     const label = selectedDisplay === "NB" ? "Nombre de prairies" : "Surface de prairies (ha)";
 
-    // initiate map elements
+    // --- Éléments carte ---
     const projection = d3.geoConicConformal()
       .center([2.2137, 46.2276])
       .scale(3000)
@@ -46,21 +58,21 @@ export function drawMap(svg, tooltip, width, height) {
     const deptsLayer = g.append("g").attr("class", "depts-layer");
     const regionsLayer = g.append("g").attr("class", "regions-layer");
     const zoom = d3.zoom()
-    .scaleExtent([1, 40])
-    .on("zoom", (event) => g.attr("transform", event.transform));
+      .scaleExtent([1, 40])
+      .on("zoom", (event) => g.attr("transform", event.transform));
     const initialScale = d3.scaleSequential().domain([0, selectedMax]).interpolator(d3.interpolateGreens);
     
-    // create button, legend, sidebar
+    // --- Bouton, légende, sidebar ---
     const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData);
     updateLegend(svg, selectedMax, label);
     createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer);
 
-    // À mettre juste avant la fin du .then(([regionsData, ...]))
+    // --- Histogramme initial ---
     const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);
     const initialData = Array.from(counts, ([type, count]) => ({ type, count }));
     updateHistogram(initialData, "France");
     
-    // start with drawing regions
+    // --- Dessin des régions ---
     showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles);
   });
 }
