@@ -1,6 +1,7 @@
 import { getCurrentRegionData, getCurrentView, getCurrentDeptData } from "../config";
 import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
+import { updateHistogram } from "./histogram.js";
 
 export function createSidebar(
   d3,
@@ -16,14 +17,19 @@ export function createSidebar(
   arrLayer
 ) {
 
+  // --- Helpers pour lire les valeurs courantes des sliders ---
+  function getAltRange() {
+    const minVal = +document.getElementById("alt-min-slider").value;
+    const maxVal = +document.getElementById("alt-max-slider").value;
+    return [minVal, maxVal];
+  }
+
   function updateVisualization() {
     const prairieType = document.getElementById("prairie-type-select").value;
     const selectedDisplay = document.getElementById("affichage-type-select").value;
+    const [altMin, altMax] = getAltRange();
 
-    currentDataMap = processData(
-      allParcelles,
-      prairieType
-    );
+    currentDataMap = processData(allParcelles, prairieType, altMin, altMax);
 
     const propertyToUse = selectedDisplay === "NB" ? "count" : "surface";
 
@@ -40,33 +46,28 @@ export function createSidebar(
         : "Surface de prairies (ha)";
 
     const currentView = getCurrentView();
-
     const currentRegionData = getCurrentRegionData();
-    if(currentRegionData){
-      const regionName = currentRegionData.properties.nom;
 
+    if (currentRegionData) {
+      const regionName = currentRegionData.properties.nom;
       const filteredDepts = deptsData.features.filter(
         f => deptToRegion[f.properties.code] === regionName
       );
-
       var newMaxDep =
-        d3.max(
-          filteredDepts,
-          f => currentDataMap.get(f.properties.nom.trim())?.[propertyToUse]
-        ) || 1;
-
+        d3.max(filteredDepts, f => currentDataMap.get(f.properties.nom.trim())?.[propertyToUse]) || 1;
       var depScale = d3.scaleSequential()
         .domain([0, newMaxDep])
         .interpolator(d3.interpolateGreens);
     }
 
     const currentDeptData = getCurrentDeptData();
-    if(currentDeptData){
+    if (currentDeptData) {
       const filteredArr = arrData.features.filter(f => {
         const arrCode = f.properties.code;
         const depCode = arrCode.slice(0, 2);
         return depCode === currentDeptData.properties.code;
       });
+<<<<<<< HEAD
 
       var newMaxArr =
         d3.max(
@@ -74,66 +75,132 @@ export function createSidebar(
           f => currentDataMap.get(f.properties.code)?.[propertyToUse]
         ) || 1;
 
+=======
+      var newMaxArr =
+        d3.max(filteredArr, f => currentDataMap.get(f.properties.code)?.[propertyToUse]) || 1;
+>>>>>>> 2da5112954690347a4cce6c7fc937afbe84f90f7
       var arrScale = d3.scaleSequential()
         .domain([0, newMaxArr])
         .interpolator(d3.interpolateGreens);
     }
-        
+
+    // --- Mise à jour carte ---
     if (currentView === "REGION") {
-
       updateLegend(svg, newMaxDep, label);
-      updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse)
+      updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse);
       updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse);
-    
     } else if (currentView === "DEPARTEMENT") {
-
       updateLegend(svg, newMaxArr, label);
       updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse);
       updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse);
       updateArrLayer(arrLayer, currentDataMap, arrScale, propertyToUse);
-
-    } else if (currentView === "FRANCE") {
+    } else {
+      // FRANCE
       updateLegend(svg, newMaxRegion, label);
       updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse);
     }
+
+    // --- Mise à jour histogramme selon la vue courante ---
+    if (!window.allParcellesData) return;
+
+    const filtered = window.allParcellesData.filter(p => {
+      const alt = +p.alt_mean;
+      return !isNaN(alt) && alt >= altMin && alt <= altMax;
+    });
+
+    let parcellesToCount = filtered;
+    let zoneName = "France";
+
+    if (currentView === "REGION" && currentRegionData) {
+      const regionCode = String(currentRegionData.properties.code);
+      parcellesToCount = filtered.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
+      zoneName = currentRegionData.properties.nom;
+    } else if ((currentView === "DEPARTEMENT" || currentView === "ARRONDISSEMENT") && currentDeptData) {
+      const deptCode = String(currentDeptData.properties.code);
+      parcellesToCount = filtered.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
+      zoneName = currentDeptData.properties.nom;
+    }
+
+    // Filtre par type de prairie si nécessaire
+    const finalParcelles = prairieType === "ALL"
+      ? parcellesToCount
+      : parcellesToCount.filter(p => p.CODE_CULTU === prairieType);
+
+    const counts = d3.rollup(finalParcelles, v => v.length, d => d.CODE_CULTU);
+    updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), zoneName);
   }
 
-  // Prairie type change
+  // --- Écouteurs sur les selects ---
   d3.select("#prairie-type-select").on("change", updateVisualization);
-
-  // Display mode change (NB / SURFACE)
   d3.select("#affichage-type-select").on("change", updateVisualization);
+
+  // --- Écouteurs sur les sliders d'altitude ---
+  const minSlider = d3.select("#alt-min-slider");
+  const maxSlider = d3.select("#alt-max-slider");
+
+  minSlider.on("input", function () {
+    let valMin = +this.value;
+    let valMax = +maxSlider.property("value");
+    if (valMin > valMax) { valMin = valMax; this.value = valMin; }
+    document.getElementById("alt-min-display").innerText = valMin;
+    updateSliderColor();
+    updateVisualization();
+  });
+
+  maxSlider.on("input", function () {
+    let valMax = +this.value;
+    let valMin = +minSlider.property("value");
+    if (valMax < valMin) { valMax = valMin; this.value = valMax; }
+    document.getElementById("alt-max-display").innerText = valMax;
+    updateSliderColor();
+    updateVisualization();
+  });
+
+  // Coloration initiale de la barre
+  updateSliderColor();
 }
 
+// --- Couches carte ---
 function updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse) {
   regionsLayer.selectAll("path")
-    .transition()
-    .duration(500)
+    .transition().duration(500)
     .attr("fill", d =>
-      regionScale(
-        currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0
-      )
+      regionScale(currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0)
     );
 }
 
 function updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse) {
   deptsLayer.selectAll("path")
-    .transition()
-    .duration(500)
+    .transition().duration(500)
     .attr("fill", d =>
-      depScale(
-        currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0
-      )
+      depScale(currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0)
     );
 }
 
 function updateArrLayer(arrLayer, currentDataMap, arrScale, propertyToUse) {
   arrLayer.selectAll("path")
-    .transition()
-    .duration(500)
+    .transition().duration(500)
     .attr("fill", d =>
-      arrScale(
-        currentDataMap.get(d.properties.code)?.[propertyToUse] || 0
-      )
+      arrScale(currentDataMap.get(d.properties.code)?.[propertyToUse] || 0)
     );
+}
+
+// --- Coloration de la barre du slider ---
+export function updateSliderColor() {
+  const minSlider = document.getElementById("alt-min-slider");
+  const maxSlider = document.getElementById("alt-max-slider");
+  const track = document.querySelector(".slider-track");
+  if (!minSlider || !maxSlider || !track) return;
+
+  const min = parseFloat(minSlider.min);
+  const max = parseFloat(minSlider.max);
+  const percent1 = ((minSlider.value - min) / (max - min)) * 100;
+  const percent2 = ((maxSlider.value - min) / (max - min)) * 100;
+
+  track.style.background = `linear-gradient(to right,
+    #ddd ${percent1}%,
+    #27ae60 ${percent1}%,
+    #27ae60 ${percent2}%,
+    #ddd ${percent2}%
+  )`;
 }

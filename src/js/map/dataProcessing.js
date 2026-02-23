@@ -1,11 +1,15 @@
 import { regCodeToName, deptCodeToName } from "../config.js";
 
 // --- FONCTION DE TRAITEMENT DES DONNÉES ---
-export function processData(allParcelles, filterValue ) {
+export function processData(allParcelles, filterValue, altMin = -Infinity, altMax = Infinity) {
   const dataMap = new Map();
-  const filtered = filterValue === "ALL"
-    ? allParcelles
-    : allParcelles.filter(p => p.CODE_CULTU === filterValue);
+
+  const filtered = allParcelles.filter(p => {
+    if (filterValue !== "ALL" && p.CODE_CULTU !== filterValue) return false;
+    const alt = +p.alt_mean;
+    if (!isNaN(alt) && (alt < altMin || alt > altMax)) return false;
+    return true;
+  });
 
   filtered.forEach(p => {
     const regCode = String(p.reg_parc || '').trim().split('.')[0];
@@ -33,4 +37,4 @@ function updateStats(dataMap, name, alt, surf) {
   s.count++;
   s.sumAlt += alt;
   s.surface += Math.round(surf);
-};
+}
