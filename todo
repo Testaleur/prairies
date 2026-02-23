@@ -1,10 +1,16 @@
 // urgent, partie principale du projet
 rajouter les prairies dans les arrondissement + permettre le zoom + flèches selon pente + gradient altitude
+changer couleur quand on zoom sur chaque chose
 
 // urgent, fonctionnalités nécessaires
 filtres, boutons et curseur du panneau à droite
-ajouter des petits graphes genre temporel, bar chart...
+ajouter des petits graphes : 
+histogramme sur la surface, 
+scatterplot surface-altitude, 
+comparaison des surfaces par région/dept, 
+histogramme des altitudes par type de prairie
 adapter les données du tooltip selon ce qui est filtré
+afficher la région/dept sélectionné
 
 // moins urgent
 supprimer les data inutiles

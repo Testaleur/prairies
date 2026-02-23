@@ -68,15 +68,11 @@ export function createSidebar(
         return depCode === currentDeptData.properties.code;
       });
 
-      console.log("filtered arrondissements:", filteredArr);
-
       var newMaxArr =
         d3.max(
           filteredArr,
           f => currentDataMap.get(f.properties.code)?.[propertyToUse]
         ) || 1;
-
-      console.log("newMaxArr:", newMaxArr);
 
       var arrScale = d3.scaleSequential()
         .domain([0, newMaxArr])
