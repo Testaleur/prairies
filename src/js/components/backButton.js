@@ -51,8 +51,8 @@ export function createBackButton(
           tooltip,
           zoom);
         if (window.allParcellesData) {
-          const deptCode = String(dept.properties.code);
-          const filtered = window.allParcellesData.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
+          const deptCode = String(parseInt(dept.properties.code));
+          const filtered = window.allParcellesData.filter(p => String(parseInt(p.dep_parc)) === deptCode);
           const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
           updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), dept.properties.nom);
         }

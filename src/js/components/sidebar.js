@@ -118,8 +118,8 @@ export function createSidebar(
       parcellesToCount = filtered.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
       zoneName = currentRegionData.properties.nom;
     } else if ((currentView === "DEPARTEMENT" || currentView === "ARRONDISSEMENT") && currentDeptData) {
-      const deptCode = String(currentDeptData.properties.code);
-      parcellesToCount = filtered.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
+      const deptCode = String(parseInt(currentDeptData.properties.code));
+      parcellesToCount = filtered.filter(p => String(parseInt(p.dep_parc)) === deptCode);
       zoneName = currentDeptData.properties.nom;
     }
 

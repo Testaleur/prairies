@@ -60,8 +60,8 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
     tooltip,
     zoom);
   if (window.allParcellesData) {
-    const deptCode = String(d.properties.code);
-    const filtered = window.allParcellesData.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
+    const deptCode = String(parseInt(d.properties.code));
+    const filtered = window.allParcellesData.filter(p => String(parseInt(p.dep_parc)) === deptCode);
     const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
   }
