@@ -4,53 +4,60 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Carte des prairies</title>
-    <script type="module" crossorigin src="/prairies/assets/index-BZrf-eXV.js"></script>
-    <link rel="stylesheet" crossorigin href="/prairies/assets/index-Dkbvo9Jj.css">
+    <script type="module" crossorigin src="/prairies/assets/index-4JC9xzOW.js"></script>
+    <link rel="stylesheet" crossorigin href="/prairies/assets/index-n3bmIZpc.css">
   </head>
   <body>
     <div id="app-container">
-      <div id="map-container">
-        <header id="map-title">Analyse des Prairies en France</header>
-        <div id="tooltip" class="tooltip"></div>
-        <div id="map"></div>
-      </div>
+    <div id="map-container">
+    <header id="map-title">Analyse des Prairies en France</header>
+    <div id="tooltip" class="tooltip"></div> <div id="map"></div>
+    
+    <div id="histogram-section">
+        <h3>Répartition par type de prairie</h3>
+        <div id="histogram-container"></div>
+    </div>
+</div>
+    
 
       <aside id="sidebar">
         <h2>Contrôles</h2>
         
-        <div class="control-group">
-          <label>Évolution temporelle</label>
-          <div class="flex-row">
-            <input type="range" min="2015" max="2024" value="2024" id="year-slider">
-            <span id="year-display">2024</span>
-          </div>
-          <button id="play-button">▶ Lancer l'animation</button>
-        </div>
-
-        <hr>
 
         <div class="control-group">
           <label for="prairie-type">Type de prairie</label>
-          <select id="prairie-type">
-            <option value="all">Tous les types</option>
-            <option value="pph">Prairies permanentes</option>
-            <option value="sph">Surface pastorale (Herbe prédominante)</option>
-            <option value="spl">Surface pastorale (Ressources fourragères ligneuses prédominantes)</option>
-            <option value="cae">Châtaigneraie</option>
-            <option value="cee">Chênaie</option>
+          <select id="prairie-type-select">
+            <option value="ALL">Toutes les prairies</option>
+            <option value="PPH">Prairies permanentes</option>
+            <option value="SPH">Surfaces pastorales (herbe)</option>
+            <option value="SPL">Surfaces pastorales (ressources fourragères)</option>
+            <option value="CAE">Châtaigneraies</option>
+            <option value="CEE">Chênaies</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label for="affichage-type">Type d'affichage</label>
+          <select id="affichage-type-select">
+            <option value="SURFACE">Par surface de prairie</option>
+            <option value="NB">Par nombre de prairies</option>
           </select>
         </div>
 
         <hr>
 
         <div class="control-group">
-          <label>Altitude min (m)</label>
-          <input type="range" min="0" max="3000" step="100" value="0" id="alt-slider">
-          <div class="flex-row">
-            <span>0m</span>
-            <span id="alt-display">0m</span>
-            <span>3000m</span>
-          </div>
+        <label>Plage d'Altitude (m)</label>
+        <div class="range-wrapper" style="position: relative; width: 100%; height: 25px; margin-top: 15px;">
+        <div class="slider-track" style="position: absolute; width: 100%; height: 6px; background: #ddd; top: 50%; transform: translateY(-50%); border-radius: 3px; z-index: 0;"></div>
+    
+        <input type="range" id="alt-min-slider" class="dual-range" style="z-index: 2;">
+        <input type="range" id="alt-max-slider" class="dual-range" style="z-index: 2;">
+        </div>
+        <div class="flex-row" style="display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold;">
+        <span><span id="alt-min-display">0</span>m</span>
+        <span><span id="alt-max-display">3000</span>m</span>
+        </div>
         </div>
 
         <hr>
@@ -59,6 +66,7 @@
           <label><input type="checkbox" id="check-pente"> Afficher les pentes</label>
           <label><input type="checkbox" id="check-alt"> Afficher l'altitude (dégradé)</label>
         </div>
+
       </aside>
     </div>
 
