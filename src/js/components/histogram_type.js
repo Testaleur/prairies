@@ -22,7 +22,7 @@ if (histoTooltip.empty()) {
         .style("opacity", 0);
 }
 
-export function updateHistogram(data, zoneName = "France") {
+export function updateHistogram_Type(data, zoneName = "France") {
     d3.select("#histogram-section h3")
       .text(`Répartition par type de prairie - ${zoneName}`);
 

@@ -2,7 +2,7 @@ import { updateLegend } from "./legend.js";
 import { showDepartments, showArrondissements } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
-import { updateHistogram } from "./histogram.js";
+import { updateHistogram_Type } from "./histogram_type.js";
 
 export function createBackButton(
   arrLayer,
@@ -54,7 +54,7 @@ export function createBackButton(
           const deptCode = String(dept.properties.code);
           const filtered = window.allParcellesData.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
           const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
-          updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), dept.properties.nom);
+          updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), dept.properties.nom);
         }
       }
       zoomToFeature(path, svg, zoom, dept, 0.9);
@@ -85,7 +85,7 @@ export function createBackButton(
           const regionCode = String(region.properties.code);
           const filtered = window.allParcellesData.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
           const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
-          updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), region.properties.nom);
+          updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), region.properties.nom);
         }
         }
         zoomToFeature(path, svg, zoom, region, 0.8);
@@ -111,7 +111,7 @@ export function createBackButton(
 
       if (window.allParcellesData) {
         const counts = d3.rollup(window.allParcellesData, v => v.length, d => d.CODE_CULTU);
-        updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), "France");
+        updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), "France");
       }
 
       regionsLayer.selectAll("path")

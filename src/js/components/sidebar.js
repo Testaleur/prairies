@@ -1,7 +1,7 @@
 import { getCurrentRegionData, getCurrentView, getCurrentDeptData } from "../config";
 import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
-import { updateHistogram } from "./histogram.js";
+import { updateHistogram_Type } from "./histogram_type.js";
 
 export function createSidebar(
   d3,
@@ -67,7 +67,6 @@ export function createSidebar(
         const depCode = arrCode.slice(0, 2);
         return depCode === currentDeptData.properties.code;
       });
-<<<<<<< HEAD
 
       var newMaxArr =
         d3.max(
@@ -75,10 +74,6 @@ export function createSidebar(
           f => currentDataMap.get(f.properties.code)?.[propertyToUse]
         ) || 1;
 
-=======
-      var newMaxArr =
-        d3.max(filteredArr, f => currentDataMap.get(f.properties.code)?.[propertyToUse]) || 1;
->>>>>>> 2da5112954690347a4cce6c7fc937afbe84f90f7
       var arrScale = d3.scaleSequential()
         .domain([0, newMaxArr])
         .interpolator(d3.interpolateGreens);
@@ -127,7 +122,7 @@ export function createSidebar(
       : parcellesToCount.filter(p => p.CODE_CULTU === prairieType);
 
     const counts = d3.rollup(finalParcelles, v => v.length, d => d.CODE_CULTU);
-    updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), zoneName);
+    updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), zoneName);
   }
 
   // --- Écouteurs sur les selects ---

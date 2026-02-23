@@ -1,6 +1,6 @@
 import { showDepartments, showArrondissements } from "./layers.js";
 import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
-import { updateHistogram } from "../components/histogram.js";
+import { updateHistogram_Type } from "../components/histogram_type.js";
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
@@ -38,7 +38,7 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
     // On filtre les données globales stockées dans window
     const filtered = window.allParcellesData.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
     const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
-    updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
+    updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
 }
 }
 
@@ -63,7 +63,7 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
     const deptCode = String(d.properties.code);
     const filtered = window.allParcellesData.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
     const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
-    updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
+    updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
   }
 }
 
