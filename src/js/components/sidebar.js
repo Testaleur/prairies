@@ -3,6 +3,11 @@ import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
 import { updateHistogram_Type } from "./histogram_type.js";
 
+// Référence partagée à la dataMap courante, lisible depuis layers.js
+let _currentDataMap = new Map();
+export function getCurrentDataMap() { return _currentDataMap; }
+export function initCurrentDataMap(map) { _currentDataMap = map; }
+
 export function createSidebar(
   d3,
   allParcelles,
@@ -17,7 +22,8 @@ export function createSidebar(
   arrLayer
 ) {
 
-  // --- Helpers pour lire les valeurs courantes des sliders ---
+  // Initialiser la dataMap partagée avec les données initiales
+  _currentDataMap = currentDataMap;
   function getAltRange() {
     const minVal = +document.getElementById("alt-min-slider").value;
     const maxVal = +document.getElementById("alt-max-slider").value;
@@ -30,6 +36,7 @@ export function createSidebar(
     const [altMin, altMax] = getAltRange();
 
     currentDataMap = processData(allParcelles, prairieType, altMin, altMax);
+    _currentDataMap = currentDataMap;
 
     const propertyToUse = selectedDisplay === "NB" ? "count" : "surface";
 
