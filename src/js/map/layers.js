@@ -7,7 +7,7 @@ import { deptToRegion, strokeColor, strokeWidth } from "../config.js";
 
 // Afficher les régions
 // Ajoute allParcelles à la fin de la liste des paramètres
-export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles) {
+export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls) {
   const propertyToUse = document.getElementById("affichage-type-select").value === "NB" ? "count" : "surface";
   const format = d3.formatLocale({
     decimal: ",",
@@ -43,11 +43,27 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
         tooltip.style("opacity", 0);
         d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
       })
-      .on("click", (event, d) => clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData, allParcelles)) // Ajoute allParcelles ici
+      .on("click", (event, d) => clicked(event,
+        d,
+        path,
+        svg,
+        zoom,
+        regionsLayer,
+        deptsData,
+        deptToRegion,
+        currentDataMap,
+        tooltip,
+        deptsLayer,
+        backButton,
+        arrLayer,
+        arrData,
+        allParcelles,
+        zoomControls
+      ));
 }
 
 // Afficher les départements d'une région
-export function showDepartments(regionName, regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData) {
+export function showDepartments(regionName, regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData, zoomControls) {
   regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
   const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
   const localMax = d3.max(filteredDepts, f => currentDataMap.get(f.properties.nom.trim())?.count) || 1;
@@ -90,13 +106,13 @@ export function showDepartments(regionName, regionsLayer, deptsData, deptToRegio
       d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
     })
     .on("click", (event, d) => {
-      zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer);
+      zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer, zoomControls);
     })
     .transition().duration(500).style("opacity", 1);
 }
 
 // Afficher les arrondissements d'un département
-export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, arrData, currentDataMap, svg, path, tooltip, zoom) {
+export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, arrData, currentDataMap, svg, path, tooltip, zoom, zoomControls) {
   deptsLayer.selectAll("path")
     .transition().duration(500)
     .style("opacity", 0)
@@ -134,7 +150,7 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
     .attr("stroke-width", strokeWidth)
     .style("opacity", 0)
     .on("mouseover", (event, d) => {
-      const code = d.properties.code;  // Use code directly
+      const code = d.properties.code;
       const stats = currentDataMap.get(code);
       tooltip.style("opacity", 1).html(`
         <div style="font-weight:bold; font-size:15px;">${code}</div>
@@ -153,7 +169,11 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
       tooltip.style("opacity", 0);
       d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
     })
-    .on("click", (event, d) => zoomToArr(event, d, backButton, path, svg, zoom, arrLayer))
+    .on("click", (event, d) => {
+      zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomControls);
+      // reset the color to white
+      d3.select(event.currentTarget).attr("fill", "#fff");
+    })
     .transition().duration(500)
     .style("opacity", 1);
 }

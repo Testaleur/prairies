@@ -5,6 +5,7 @@ import { createBackButton } from "../components/backButton.js";
 import { createSidebar } from "../components/sidebar.js";
 import { showRegions } from "./layers.js";
 import { updateHistogram } from "../components/histogram.js";
+import { createZoomControls } from "../components/zoomControls.js";
 
 // Variables globales pour le filtrage
 let allParcelles = []; 
@@ -61,9 +62,10 @@ export function drawMap(svg, tooltip, width, height) {
       .scaleExtent([1, 40])
       .on("zoom", (event) => g.attr("transform", event.transform));
     const initialScale = d3.scaleSequential().domain([0, selectedMax]).interpolator(d3.interpolateGreens);
+    const zoomControls = createZoomControls(svg, zoom);
     
     // --- Bouton, légende, sidebar ---
-    const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData);
+    const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData, zoomControls);
     updateLegend(svg, selectedMax, label);
     createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer);
 
@@ -73,6 +75,6 @@ export function drawMap(svg, tooltip, width, height) {
     updateHistogram(initialData, "France");
     
     // --- Dessin des régions ---
-    showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles);
+    showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls);
   });
 }

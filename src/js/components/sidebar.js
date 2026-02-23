@@ -67,7 +67,6 @@ export function createSidebar(
         const depCode = arrCode.slice(0, 2);
         return depCode === currentDeptData.properties.code;
       });
-<<<<<<< HEAD
 
       var newMaxArr =
         d3.max(
@@ -75,10 +74,6 @@ export function createSidebar(
           f => currentDataMap.get(f.properties.code)?.[propertyToUse]
         ) || 1;
 
-=======
-      var newMaxArr =
-        d3.max(filteredArr, f => currentDataMap.get(f.properties.code)?.[propertyToUse]) || 1;
->>>>>>> 2da5112954690347a4cce6c7fc937afbe84f90f7
       var arrScale = d3.scaleSequential()
         .domain([0, newMaxArr])
         .interpolator(d3.interpolateGreens);
