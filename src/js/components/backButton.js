@@ -3,6 +3,7 @@ import { showDepartments, showArrondissements } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
 import { updateHistogram_Type } from "./histogram_type.js";
+import { updateHistogram_Alti } from "./histogram_alti.js";
 
 export function createBackButton(
   arrLayer,
@@ -31,7 +32,6 @@ export function createBackButton(
     .on("click", () => reset());
 
   function reset() {
-    const currentText = backButton.text();
 
     if (getCurrentView() === "ARRONDISSEMENT") {
       setCurrentView("DEPARTEMENT");
@@ -55,6 +55,7 @@ export function createBackButton(
           const filtered = window.allParcellesData.filter(p => String(parseInt(p.dep_parc)) === deptCode);
           const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
           updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), dept.properties.nom);
+          updateHistogram_Alti(filtered, dept.properties.nom);
         }
       }
       zoomToFeature(path, svg, zoom, dept, 0.9);
@@ -80,17 +81,18 @@ export function createBackButton(
           backButton,
           zoom,
           arrLayer,
-          arrData)
+          arrData);
         if (window.allParcellesData) {
           const regionCode = String(region.properties.code);
           const filtered = window.allParcellesData.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
           const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
           updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), region.properties.nom);
+          updateHistogram_Alti(filtered, region.properties.nom);
         }
-        }
-        zoomToFeature(path, svg, zoom, region, 0.8);
-        setCurrentDeptData(null)
       }
+      zoomToFeature(path, svg, zoom, region, 0.8);
+      setCurrentDeptData(null);
+    }
 
     else if (getCurrentView() === "REGION") {
       setCurrentView("FRANCE");
@@ -99,10 +101,8 @@ export function createBackButton(
       arrLayer.selectAll("path").remove();
       deptsLayer.selectAll("path").remove();
 
-      const maxVal =
-        d3.max(regionsNames, n => currentDataMap.get(n)?.count) || 100;
-      const maxSurface =
-        d3.max(regionsNames, n => currentDataMap.get(n)?.surface) || 100;
+      const maxVal = d3.max(regionsNames, n => currentDataMap.get(n)?.count) || 100;
+      const maxSurface = d3.max(regionsNames, n => currentDataMap.get(n)?.surface) || 100;
       const selectedDisplay = document.getElementById("affichage-type-select").value;
       const selectedMax = selectedDisplay === "NB" ? maxVal : maxSurface;
       const label = selectedDisplay === "NB" ? "Nombre de prairies" : "Surface de prairies (ha)";
@@ -112,17 +112,15 @@ export function createBackButton(
       if (window.allParcellesData) {
         const counts = d3.rollup(window.allParcellesData, v => v.length, d => d.CODE_CULTU);
         updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), "France");
+        updateHistogram_Alti(window.allParcellesData, "France");
       }
 
       regionsLayer.selectAll("path")
-        .transition()
-        .duration(500)
+        .transition().duration(500)
         .style("opacity", 1)
         .style("pointer-events", "all");
 
-      svg.transition()
-        .duration(750)
-        .call(zoom.transform, d3.zoomIdentity);
+      svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
 
       setCurrentRegionData(null);
     }

@@ -2,6 +2,7 @@ import { getCurrentRegionData, getCurrentView, getCurrentDeptData } from "../con
 import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
 import { updateHistogram_Type } from "./histogram_type.js";
+import { updateHistogram_Alti } from "./histogram_alti.js";
 
 // Référence partagée à la dataMap courante, lisible depuis layers.js
 let _currentDataMap = new Map();
@@ -130,6 +131,7 @@ export function createSidebar(
 
     const counts = d3.rollup(finalParcelles, v => v.length, d => d.CODE_CULTU);
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), zoneName);
+    updateHistogram_Alti(finalParcelles, zoneName);
   }
 
   // --- Écouteurs sur les selects ---
