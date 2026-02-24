@@ -150,30 +150,42 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
     .attr("stroke-width", strokeWidth)
     .style("opacity", 0)
     .on("mouseover", (event, d) => {
-      const code = d.properties.code;
-      const stats = currentDataMap.get(code);
-      tooltip.style("opacity", 1).html(`
-        <div style="font-weight:bold; font-size:15px;">${code}</div>
-        <hr>
-        <div><strong>Nombre :</strong> ${stats ? stats.count : 0}</div>
-        <div><strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha</div>
-        <div><strong>Altitude :</strong> ${stats ? stats.avgAlt : 0} m</div>
-      `);
-      d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
+      if(!isShowPrairiesChecked()){
+        const code = d.properties.code;
+        const stats = currentDataMap.get(code);
+        tooltip.style("opacity", 1).html(`
+          <div style="font-weight:bold; font-size:15px;">${code}</div>
+          <hr>
+          <div><strong>Nombre :</strong> ${stats ? stats.count : 0}</div>
+          <div><strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha</div>
+          <div><strong>Altitude :</strong> ${stats ? stats.avgAlt : 0} m</div>
+        `);
+        d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
+      }
     })
     .on("mousemove", (event) => {
+      if(!isShowPrairiesChecked()){
       tooltip.style("left", (event.pageX + 15) + "px")
              .style("top", (event.pageY + 15) + "px");
+      }
     })
     .on("mouseout", (event) => {
-      tooltip.style("opacity", 0);
-      d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
+      if(!isShowPrairiesChecked()){
+        tooltip.style("opacity", 0);
+        d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
+      }
     })
     .on("click", (event, d) => {
-      zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomControls);
-      // reset the color to white
-      d3.select(event.currentTarget).attr("fill", "#fff");
+      if(!isShowPrairiesChecked()) {
+        zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomControls);
+        // reset the color to white
+        d3.select(event.currentTarget).attr("fill", "#fff");
+      }
     })
     .transition().duration(500)
     .style("opacity", 1);
+}
+
+function isShowPrairiesChecked() {
+  return document.getElementById("check-prairies").checked;
 }

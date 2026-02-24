@@ -1,7 +1,8 @@
 import { showDepartments, showArrondissements } from "./layers.js";
 import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
 import { updateHistogram } from "../components/histogram.js";
-import { disablePanAndZoom, enablePanAndZoom } from "../components/zoomControls.js";
+import { enablePanAndZoom } from "../components/zoomControls.js";
+import { enableButtons } from "../components/sidebar.js";
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
@@ -78,8 +79,10 @@ export function zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomC
   setCurrentView("ARRONDISSEMENT");
   zoomControls.updateVisibility();
   enablePanAndZoom(svg, zoom);
+  enableButtons();
   event.stopPropagation();
   backButton.text("← Retour au Département");
   zoomToFeature(path, svg, zoom, d, 0.9);
   arrLayer.selectAll("path").transition().duration(750).style("opacity", node => node === d ? 1 : 0.1);
 }
+  

@@ -67,7 +67,7 @@ export function drawMap(svg, tooltip, width, height) {
     // --- Bouton, légende, sidebar ---
     const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData, zoomControls);
     updateLegend(svg, selectedMax, label);
-    createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer);
+    createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer, path);
 
     // --- Histogramme initial ---
     const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);

@@ -10,6 +10,13 @@ comparaison des surfaces par région/dept,
 histogramme des altitudes par type de prairie
 afficher la région/dept sélectionné
 afficher les sources
+rajouter du texte, des explications
+ajouter une flèche vers le bas, en bas à gauche
+texte explicatif filtre + savoir qu'on peut cliquer sur les régions
+bug : quand on zoom et qu'on change le type et qu'on zoom/dezoom, idem pour l'altitude
+bug : l'échelle de couleur se casse momentanément lorsque l'on est dans une région et que l'on change le type de prairie (tout devient blanc) ??
+lorsqu'on clique sur un case à cocher désactivée, afficher message pour dire de cliquer sur un arrondissement d'abord
 
 // moins urgent
 supprimer les data inutiles
+trier les hist dans l'ordre décroissant

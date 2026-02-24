@@ -4,6 +4,7 @@ import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
 import { updateHistogram } from "./histogram.js";
 import { disablePanAndZoom } from "./zoomControls.js";
+import { disableButtons } from "./sidebar.js";
 
 export function createBackButton(
   arrLayer,
@@ -39,6 +40,7 @@ export function createBackButton(
       setCurrentView("DEPARTEMENT");
       zoomControls.updateVisibility();
       disablePanAndZoom(svg);
+      disableButtons()
       backButton.text("← Retour à la Région");
       arrLayer.selectAll("path").remove();
       const dept = getCurrentDeptData();
