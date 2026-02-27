@@ -4,8 +4,9 @@ import { updateLegend } from "../components/legend.js";
 import { createBackButton } from "../components/backButton.js";
 import { createSidebar } from "../components/sidebar.js";
 import { showRegions } from "./layers.js";
-import { updateHistogram } from "../components/histogram.js";
 import { createZoomControls } from "../components/zoomControls.js";
+import { updateHistogram_Type } from "../components/histogram_type.js";
+import { updateHistogram_Alti } from "../components/histogram_alti.js";
 
 // Variables globales pour le filtrage
 let allParcelles = []; 
@@ -69,10 +70,10 @@ export function drawMap(svg, tooltip, width, height) {
     updateLegend(svg, selectedMax, label);
     createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer, path);
 
-    // --- Histogramme initial ---
+    // --- Histogrammes initiaux ---
     const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);
-    const initialData = Array.from(counts, ([type, count]) => ({ type, count }));
-    updateHistogram(initialData, "France");
+    updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), "France");
+    updateHistogram_Alti(parcellesData, "France");
     
     // --- Dessin des régions ---
     showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls);

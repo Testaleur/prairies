@@ -2,6 +2,7 @@ import { updateLegend } from "../components/legend.js";
 import { zoomToDept, zoomToArr } from "./interactions";
 import { clicked } from "./interactions";
 import { deptToRegion, strokeColor, strokeWidth } from "../config.js";
+import { getCurrentDataMap } from "../components/sidebar.js";
 
 // gestion de l'affichage des différentes couches de la carte : régions, départements, arrondissements
 
@@ -27,10 +28,10 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
     .attr("stroke-width", strokeWidth)
     .on("mouseover", (event, d) => {
       const name = d.properties.nom;
-      const stats = currentDataMap.get(name.trim());
+      const stats = getCurrentDataMap().get(name.trim());
       tooltip.style("opacity", 1).html(`
         <strong>Région :</strong> ${name}<br/>
-        <strong>Nombre :</strong> ${stats ? format(stats.count) : 0}<br/>
+        <strong>Nombre de prairies :</strong> ${stats ? format(stats.count) : 0}<br/>
         <strong>Surface de prairies :</strong> ${stats ? format(stats.surface) : 0} ha<br/>
         <strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m
         `);
@@ -66,8 +67,9 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
 export function showDepartments(regionName, regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData, zoomControls) {
   regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
   const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
-  const localMax = d3.max(filteredDepts, f => currentDataMap.get(f.properties.nom.trim())?.count) || 1;
-  const localMaxSurface = d3.max(filteredDepts, f => currentDataMap.get(f.properties.nom.trim())?.surface) || 1;
+  const liveMap = getCurrentDataMap();
+  const localMax = d3.max(filteredDepts, f => liveMap.get(f.properties.nom.trim())?.count) || 1;
+  const localMaxSurface = d3.max(filteredDepts, f => liveMap.get(f.properties.nom.trim())?.surface) || 1;
   const selectedDisplay = document.getElementById("affichage-type-select").value;
   const selectedMax = selectedDisplay === "NB" ? localMax : localMaxSurface;
   const label = selectedDisplay === "NB" ? "Nombre de prairies" : "Surface de prairies (ha)";
@@ -80,21 +82,19 @@ export function showDepartments(regionName, regionsLayer, deptsData, deptToRegio
     .attr("d", path)
     .style("vector-effect", "non-scaling-stroke")
     .style("pointer-events", "all")
-    .attr("fill", d => {
-      return localScale(currentDataMap.get(d.properties.nom.trim())?.[propertyToUse] || 0);
-    })
+    .attr("fill", d => localScale(liveMap.get(d.properties.nom.trim())?.[propertyToUse] || 0))
     .attr("stroke", strokeColor)
     .attr("stroke-width", strokeWidth)
     .style("opacity", 0)
     .on("mouseover", (event, d) => {
       const name = d.properties.nom;
-      const stats = currentDataMap.get(name.trim());
+      const stats = getCurrentDataMap().get(name.trim());
       tooltip.style("opacity", 1).html(`
         <div style="font-weight:bold; font-size:15px;">${name}</div>
         <hr>
-        <div><strong>Nombre :</strong> ${stats ? stats.count : 0}</div>
+        <div><strong>Nombre de prairies :</strong> ${stats ? stats.count : 0}</div>
         <strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha<br/>
-        <div><strong>Altitude :</strong> ${stats ? stats.avgAlt : 0} m</div>
+        <div><strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m</div>
       `);
       d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
     })
@@ -118,11 +118,11 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
     .style("opacity", 0)
     .style("pointer-events", "none");
 
-  // Filter arrondissements by department
   const filteredArr = arrData.features.filter(f => f.properties.code.startsWith(deptCode));
+  const liveMap = getCurrentDataMap();
 
-  const localMax = d3.max(filteredArr, f => currentDataMap.get(f.properties.code)?.count) || 1;
-  const localMaxSurface = d3.max(filteredArr, f => currentDataMap.get(f.properties.code)?.surface) || 1;
+  const localMax = d3.max(filteredArr, f => liveMap.get(f.properties.code)?.count) || 1;
+  const localMaxSurface = d3.max(filteredArr, f => liveMap.get(f.properties.code)?.surface) || 1;
 
   const selectedDisplay = document.getElementById("affichage-type-select").value;
   const selectedMax = selectedDisplay === "NB" ? localMax : localMaxSurface;
@@ -136,16 +136,13 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
   updateLegend(svg, selectedMax, label);
 
   const arr = arrLayer.selectAll("path")
-    .data(filteredArr, d => d.properties.code); // key = arrCode
+    .data(filteredArr, d => d.properties.code);
 
   arr.enter()
     .append("path")
     .attr("d", path)
     .style("vector-effect", "non-scaling-stroke")
-    .attr("fill", d => {
-      const stats = currentDataMap.get(d.properties.code);
-      return localScale(stats ? stats[propertyToUse] : 0);
-    })
+    .attr("fill", d => localScale(liveMap.get(d.properties.code)?.[propertyToUse] || 0))
     .attr("stroke", strokeColor)
     .attr("stroke-width", strokeWidth)
     .style("opacity", 0)

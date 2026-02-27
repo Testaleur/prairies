@@ -1,8 +1,14 @@
 import { getCurrentRegionData, getCurrentView, getCurrentDeptData, getCurrentArrData } from "../config";
 import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
-import { updateHistogram } from "./histogram.js";
 import { afficherPrairies } from "../map/prairies.js";
+import { updateHistogram_Type } from "./histogram_type.js";
+import { updateHistogram_Alti } from "./histogram_alti.js";
+
+// Référence partagée à la dataMap courante, lisible depuis layers.js
+let _currentDataMap = new Map();
+export function getCurrentDataMap() { return _currentDataMap; }
+export function initCurrentDataMap(map) { _currentDataMap = map; }
 
 export function createSidebar(
   d3,
@@ -19,7 +25,8 @@ export function createSidebar(
   path
 ) {
 
-  // --- Helpers pour lire les valeurs courantes des sliders ---
+  // Initialiser la dataMap partagée avec les données initiales
+  _currentDataMap = currentDataMap;
   function getAltRange() {
     const minVal = +document.getElementById("alt-min-slider").value;
     const maxVal = +document.getElementById("alt-max-slider").value;
@@ -32,6 +39,7 @@ export function createSidebar(
     const [altMin, altMax] = getAltRange();
 
     currentDataMap = processData(allParcelles, prairieType, altMin, altMax);
+    _currentDataMap = currentDataMap;
 
     const propertyToUse = selectedDisplay === "NB" ? "count" : "surface";
 
@@ -113,8 +121,8 @@ export function createSidebar(
       parcellesToCount = filtered.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
       zoneName = currentRegionData.properties.nom;
     } else if ((currentView === "DEPARTEMENT" || currentView === "ARRONDISSEMENT") && currentDeptData) {
-      const deptCode = String(currentDeptData.properties.code);
-      parcellesToCount = filtered.filter(p => String(p.dep_parc).split('.')[0] === deptCode);
+      const deptCode = String(parseInt(currentDeptData.properties.code));
+      parcellesToCount = filtered.filter(p => String(parseInt(p.dep_parc)) === deptCode);
       zoneName = currentDeptData.properties.nom;
     }
 
@@ -124,7 +132,8 @@ export function createSidebar(
       : parcellesToCount.filter(p => p.CODE_CULTU === prairieType);
 
     const counts = d3.rollup(finalParcelles, v => v.length, d => d.CODE_CULTU);
-    updateHistogram(Array.from(counts, ([type, count]) => ({ type, count })), zoneName);
+    updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), zoneName);
+    updateHistogram_Alti(finalParcelles, zoneName);
   }
 
   // --- Écouteurs sur les selects ---
