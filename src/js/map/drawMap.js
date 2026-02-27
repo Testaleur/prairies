@@ -59,7 +59,7 @@ export function drawMap(svg, tooltip, width, height) {
     const deptsLayer = g.append("g").attr("class", "depts-layer");
     const regionsLayer = g.append("g").attr("class", "regions-layer");
     const zoom = d3.zoom()
-      .scaleExtent([1, 40])
+      .scaleExtent([1, 200])
       .on("zoom", (event) => g.attr("transform", event.transform));
     const initialScale = d3.scaleSequential().domain([0, selectedMax]).interpolator(d3.interpolateGreens);
     const zoomControls = createZoomControls(svg, zoom);
