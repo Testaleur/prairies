@@ -8,7 +8,7 @@ import { getCurrentDataMap } from "../components/sidebar.js";
 
 // Afficher les régions
 // Ajoute allParcelles à la fin de la liste des paramètres
-export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles) {
+export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls) {
   const propertyToUse = document.getElementById("affichage-type-select").value === "NB" ? "count" : "surface";
   const format = d3.formatLocale({
     decimal: ",",
@@ -44,11 +44,27 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
         tooltip.style("opacity", 0);
         d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
       })
-      .on("click", (event, d) => clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData, allParcelles)) // Ajoute allParcelles ici
+      .on("click", (event, d) => clicked(event,
+        d,
+        path,
+        svg,
+        zoom,
+        regionsLayer,
+        deptsData,
+        deptToRegion,
+        currentDataMap,
+        tooltip,
+        deptsLayer,
+        backButton,
+        arrLayer,
+        arrData,
+        allParcelles,
+        zoomControls
+      ));
 }
 
 // Afficher les départements d'une région
-export function showDepartments(regionName, regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData) {
+export function showDepartments(regionName, regionsLayer, deptsData, deptToRegion, currentDataMap, svg, path, deptsLayer, tooltip, backButton, zoom, arrLayer, arrData, zoomControls) {
   regionsLayer.selectAll("path").transition().duration(500).style("opacity", 0).style("pointer-events", "none");
   const filteredDepts = deptsData.features.filter(f => deptToRegion[f.properties.code] === regionName);
   const liveMap = getCurrentDataMap();
@@ -90,13 +106,13 @@ export function showDepartments(regionName, regionsLayer, deptsData, deptToRegio
       d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
     })
     .on("click", (event, d) => {
-      zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer);
+      zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer, zoomControls);
     })
     .transition().duration(500).style("opacity", 1);
 }
 
 // Afficher les arrondissements d'un département
-export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, arrData, currentDataMap, svg, path, tooltip, zoom) {
+export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, arrData, currentDataMap, svg, path, tooltip, zoom, zoomControls) {
   deptsLayer.selectAll("path")
     .transition().duration(500)
     .style("opacity", 0)
@@ -131,26 +147,42 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
     .attr("stroke-width", strokeWidth)
     .style("opacity", 0)
     .on("mouseover", (event, d) => {
-      const code = d.properties.code;
-      const stats = getCurrentDataMap().get(code);
-      tooltip.style("opacity", 1).html(`
-        <div style="font-weight:bold; font-size:15px;">${code}</div>
-        <hr>
-        <div><strong>Nombre de prairies :</strong> ${stats ? stats.count : 0}</div>
-        <div><strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha</div>
-        <div><strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m</div>
-      `);
-      d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
+      if(!isShowPrairiesChecked()){
+        const code = d.properties.code;
+        const stats = currentDataMap.get(code);
+        tooltip.style("opacity", 1).html(`
+          <div style="font-weight:bold; font-size:15px;">${code}</div>
+          <hr>
+          <div><strong>Nombre :</strong> ${stats ? stats.count : 0}</div>
+          <div><strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha</div>
+          <div><strong>Altitude :</strong> ${stats ? stats.avgAlt : 0} m</div>
+        `);
+        d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
+      }
     })
     .on("mousemove", (event) => {
+      if(!isShowPrairiesChecked()){
       tooltip.style("left", (event.pageX + 15) + "px")
              .style("top", (event.pageY + 15) + "px");
+      }
     })
     .on("mouseout", (event) => {
-      tooltip.style("opacity", 0);
-      d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
+      if(!isShowPrairiesChecked()){
+        tooltip.style("opacity", 0);
+        d3.select(event.currentTarget).attr("stroke", strokeColor).attr("stroke-width", strokeWidth);
+      }
     })
-    .on("click", (event, d) => zoomToArr(event, d, backButton, path, svg, zoom, arrLayer))
+    .on("click", (event, d) => {
+      if(!isShowPrairiesChecked()) {
+        zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomControls);
+        // reset the color to white
+        d3.select(event.currentTarget).attr("fill", "#fff");
+      }
+    })
     .transition().duration(500)
     .style("opacity", 1);
+}
+
+function isShowPrairiesChecked() {
+  return document.getElementById("check-prairies").checked;
 }

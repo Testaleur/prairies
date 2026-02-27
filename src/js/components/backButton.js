@@ -2,6 +2,8 @@ import { updateLegend } from "./legend.js";
 import { showDepartments, showArrondissements } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
+import { disablePanAndZoom } from "./zoomControls.js";
+import { disableButtons } from "./sidebar.js";
 import { updateHistogram_Type } from "./histogram_type.js";
 import { updateHistogram_Alti } from "./histogram_alti.js";
 
@@ -17,7 +19,8 @@ export function createBackButton(
   regionsNames,
   currentDataMap,
   tooltip,
-  arrData
+  arrData,
+  zoomControls
 ) {
 
   const backButton = d3.select("#map-container")
@@ -35,6 +38,9 @@ export function createBackButton(
 
     if (getCurrentView() === "ARRONDISSEMENT") {
       setCurrentView("DEPARTEMENT");
+      zoomControls.updateVisibility();
+      disablePanAndZoom(svg);
+      disableButtons()
       backButton.text("← Retour à la Région");
       arrLayer.selectAll("path").remove();
       const dept = getCurrentDeptData();
@@ -49,7 +55,9 @@ export function createBackButton(
           svg,
           path,
           tooltip,
-          zoom);
+          zoom,
+          zoomControls
+        );
         if (window.allParcellesData) {
           const deptCode = String(parseInt(dept.properties.code));
           const filtered = window.allParcellesData.filter(p => String(parseInt(p.dep_parc)) === deptCode);
@@ -64,6 +72,8 @@ export function createBackButton(
 
     else if (getCurrentView() === "DEPARTEMENT") {
       setCurrentView("REGION");
+      zoomControls.updateVisibility();
+      disablePanAndZoom(svg);
       backButton.text("← Retour à la France");
       arrLayer.selectAll("path").remove();
       const region = getCurrentRegionData();
@@ -81,7 +91,8 @@ export function createBackButton(
           backButton,
           zoom,
           arrLayer,
-          arrData);
+          arrData,
+          zoomControls);
         if (window.allParcellesData) {
           const regionCode = String(region.properties.code);
           const filtered = window.allParcellesData.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
@@ -96,6 +107,8 @@ export function createBackButton(
 
     else if (getCurrentView() === "REGION") {
       setCurrentView("FRANCE");
+      zoomControls.updateVisibility();
+      disablePanAndZoom(svg);
       backButton.style("display", "none");
 
       arrLayer.selectAll("path").remove();

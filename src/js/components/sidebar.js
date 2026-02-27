@@ -1,6 +1,7 @@
-import { getCurrentRegionData, getCurrentView, getCurrentDeptData } from "../config";
+import { getCurrentRegionData, getCurrentView, getCurrentDeptData, getCurrentArrData } from "../config";
 import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
+import { afficherPrairies } from "../map/prairies.js";
 import { updateHistogram_Type } from "./histogram_type.js";
 import { updateHistogram_Alti } from "./histogram_alti.js";
 
@@ -20,7 +21,8 @@ export function createSidebar(
   svg,
   deptsLayer,
   arrData,
-  arrLayer
+  arrLayer,
+  path
 ) {
 
   // Initialiser la dataMap partagée avec les données initiales
@@ -162,6 +164,11 @@ export function createSidebar(
 
   // Coloration initiale de la barre
   updateSliderColor();
+
+  // boutons de filtre
+  addCheckboxListeners(svg, allParcelles, path, arrLayer);
+  // désactivés tant que l'on n'est pas dans un arrondissement
+  disableButtons();
 }
 
 // --- Couches carte ---
@@ -208,3 +215,26 @@ export function updateSliderColor() {
     #ddd ${percent2}%
   )`;
 }
+
+
+// option des boutons de filtre
+export function enableButtons() {
+  d3.select("#checkbox-group").selectAll("input[type='checkbox']").attr("disabled", null);
+}
+
+export function disableButtons() {
+  d3.select("#checkbox-group")
+    .selectAll("input[type='checkbox']")
+    .property("checked", false)
+    .attr("disabled", "disabled");
+}
+
+export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
+  document.getElementById("check-prairies").addEventListener("change", function() {
+  if (this.checked) {
+      afficherPrairies(svg, allParcelles, getCurrentArrData(), path, arrLayer);
+    } else {
+      svg.selectAll(".prairie-layer").remove();
+    }
+  })
+};

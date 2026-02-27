@@ -4,6 +4,7 @@ import { updateLegend } from "../components/legend.js";
 import { createBackButton } from "../components/backButton.js";
 import { createSidebar } from "../components/sidebar.js";
 import { showRegions } from "./layers.js";
+import { createZoomControls } from "../components/zoomControls.js";
 import { updateHistogram_Type } from "../components/histogram_type.js";
 import { updateHistogram_Alti } from "../components/histogram_alti.js";
 
@@ -59,14 +60,15 @@ export function drawMap(svg, tooltip, width, height) {
     const deptsLayer = g.append("g").attr("class", "depts-layer");
     const regionsLayer = g.append("g").attr("class", "regions-layer");
     const zoom = d3.zoom()
-      .scaleExtent([1, 40])
+      .scaleExtent([1, 200])
       .on("zoom", (event) => g.attr("transform", event.transform));
     const initialScale = d3.scaleSequential().domain([0, selectedMax]).interpolator(d3.interpolateGreens);
+    const zoomControls = createZoomControls(svg, zoom);
     
     // --- Bouton, légende, sidebar ---
-    const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData);
+    const backButton = createBackButton(arrLayer, deptsLayer, deptsData, regionsLayer, deptToRegion, path, svg, zoom, regionsNames, currentDataMap, tooltip, arrData, zoomControls);
     updateLegend(svg, selectedMax, label);
-    createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer);
+    createSidebar(d3, allParcelles, regionsNames, currentDataMap, regionsLayer, deptsData, deptToRegion, svg, deptsLayer, arrData, arrLayer, path);
 
     // --- Histogrammes initiaux ---
     const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);
@@ -74,6 +76,6 @@ export function drawMap(svg, tooltip, width, height) {
     updateHistogram_Alti(parcellesData, "France");
     
     // --- Dessin des régions ---
-    showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles);
+    showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls);
   });
 }

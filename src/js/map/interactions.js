@@ -1,5 +1,7 @@
 import { showDepartments, showArrondissements } from "./layers.js";
 import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
+import { enablePanAndZoom } from "../components/zoomControls.js";
+import { enableButtons } from "../components/sidebar.js";
 import { updateHistogram_Type } from "../components/histogram_type.js";
 import { updateHistogram_Alti } from "../components/histogram_alti.js";
 
@@ -14,9 +16,10 @@ export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   );
 }
 
-export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData, allParcelles) {
+export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls) {
   setCurrentRegionData(d);
   setCurrentView("REGION");
+  zoomControls.updateVisibility();
   backButton.style("display", "block").text("← Retour à la France");
   if (event) event.stopPropagation();
   zoomToFeature(path, svg, zoom, d, 0.7);
@@ -33,7 +36,8 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
     backButton, 
     zoom, 
     arrLayer, 
-    arrData);
+    arrData,
+    zoomControls);
   if (window.allParcellesData) {
     const regionCode = String(d.properties.code);
     const filtered = window.allParcellesData.filter(p => String(p.reg_parc).split('.')[0] === regionCode);
@@ -43,9 +47,10 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
   }
 }
 
-export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer) {
+export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrData, currentDataMap, tooltip, deptsLayer, zoomControls) {
   setCurrentDeptData(d);
   setCurrentView("DEPARTEMENT");
+  zoomControls.updateVisibility();
   event.stopPropagation();
   backButton.text("← Retour à la Région");
   zoomToFeature(path, svg, zoom, d, 0.8);
@@ -59,7 +64,9 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
     svg,
     path,
     tooltip,
-    zoom);
+    zoom,
+    zoomControls
+  );
   if (window.allParcellesData) {
     const deptCode = String(parseInt(d.properties.code));
     const filtered = window.allParcellesData.filter(p => String(parseInt(p.dep_parc)) === deptCode);
@@ -69,11 +76,15 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
   }
 }
 
-export function zoomToArr(event, d, backButton, path, svg, zoom, arrLayer) {
+export function zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomControls) {
   setCurrentArrData(d);
   setCurrentView("ARRONDISSEMENT");
+  zoomControls.updateVisibility();
+  enablePanAndZoom(svg, zoom);
+  enableButtons();
   event.stopPropagation();
   backButton.text("← Retour au Département");
   zoomToFeature(path, svg, zoom, d, 0.9);
   arrLayer.selectAll("path").transition().duration(750).style("opacity", node => node === d ? 1 : 0.1);
 }
+  
