@@ -3,6 +3,7 @@ import { zoomToDept, zoomToArr } from "./interactions";
 import { clicked } from "./interactions";
 import { deptToRegion, strokeColor, strokeWidth } from "../config.js";
 import { getCurrentDataMap } from "../components/sidebar.js";
+import { labelsTraduction } from "../components/histogram_type.js";
 
 // gestion de l'affichage des différentes couches de la carte : régions, départements, arrondissements
 
@@ -29,10 +30,11 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
     .on("mouseover", (event, d) => {
       const name = d.properties.nom;
       const stats = getCurrentDataMap().get(name.trim());
+      const typeName = getSelectedTypeName();
       tooltip.style("opacity", 1).html(`
         <strong>Région :</strong> ${name}<br/>
-        <strong>Nombre de prairies :</strong> ${stats ? format(stats.count) : 0}<br/>
-        <strong>Surface de prairies :</strong> ${stats ? format(stats.surface) : 0} ha<br/>
+        <strong>Nombre de ${typeName} :</strong> ${stats ? format(stats.count) : 0}<br/>
+        <strong>Surface de ${typeName} :</strong> ${stats ? format(stats.surface) : 0} ha<br/>
         <strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m
         `);
         d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
@@ -89,11 +91,12 @@ export function showDepartments(regionName, regionsLayer, deptsData, deptToRegio
     .on("mouseover", (event, d) => {
       const name = d.properties.nom;
       const stats = getCurrentDataMap().get(name.trim());
+      const typeName = getSelectedTypeName();
       tooltip.style("opacity", 1).html(`
         <div style="font-weight:bold; font-size:15px;">${name}</div>
         <hr>
-        <div><strong>Nombre de prairies :</strong> ${stats ? stats.count : 0}</div>
-        <strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha<br/>
+        <div><strong>Nombre de ${typeName} :</strong> ${stats ? stats.count : 0}</div>
+        <strong>Surface de ${typeName} :</strong> ${stats ? stats.surface : 0} ha<br/>
         <div><strong>Altitude moy. :</strong> ${stats ? stats.avgAlt : 0} m</div>
       `);
       d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
@@ -150,11 +153,12 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
       if(!isShowPrairiesChecked()){
         const code = d.properties.code;
         const stats = currentDataMap.get(code);
+        const typeName = getSelectedTypeName();
         tooltip.style("opacity", 1).html(`
           <div style="font-weight:bold; font-size:15px;">${code}</div>
           <hr>
-          <div><strong>Nombre :</strong> ${stats ? stats.count : 0}</div>
-          <div><strong>Surface de prairies :</strong> ${stats ? stats.surface : 0} ha</div>
+          <div><strong>Nombre de ${typeName}:</strong> ${stats ? stats.count : 0}</div>
+          <div><strong>Surface de ${typeName} :</strong> ${stats ? stats.surface : 0} ha</div>
           <div><strong>Altitude :</strong> ${stats ? stats.avgAlt : 0} m</div>
         `);
         d3.select(event.currentTarget).attr("stroke", "#000").attr("stroke-width", 1.5).raise();
@@ -185,4 +189,9 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
 
 function isShowPrairiesChecked() {
   return document.getElementById("check-prairies").checked;
+}
+
+function getSelectedTypeName() {
+  const code = document.getElementById("prairie-type-select").value;
+  return code === "ALL" ? "prairies" : (labelsTraduction[code] || code);
 }

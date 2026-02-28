@@ -1,4 +1,5 @@
-const labelsTraduction = {
+// histogram_type.js
+export const labelsTraduction = {  // Ajout de export ici
     "PPH": "Prairies permanentes",
     "SPH": "Surfaces pastorales (herbe)",
     "SPL": "Surfaces pastorales (fourrage)",
