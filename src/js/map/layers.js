@@ -63,6 +63,51 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
         allParcelles,
         zoomControls
       ));
+
+      const mapContainer = d3.select("#map-container");
+
+      
+      if (mapContainer.select(".scroll-indicator").empty()) {
+        const indicator = mapContainer.append("div")
+        .attr("class", "scroll-indicator")
+        .style("position", "absolute")
+        .style("bottom", "20px")
+        .style("left", "20px")
+        .style("cursor", "pointer")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("align-items", "center")
+        .style("color", "#000000") 
+        .style("font-weight", "bold")
+        .style("z-index", "1000")
+        .on("click", () => {
+          
+        const histoSection = document.getElementById("histogram-section");
+        if (histoSection) {
+          histoSection.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+
+      indicator.append("span")
+      .text("Graphiques")
+      .style("font-size", "14px");
+
+      indicator.append("span")
+      .text("↓")
+      .style("font-size", "20px")
+      .style("margin-top", "-5px");
+    
+      
+      indicator.style("transition", "transform 0.3s ease-in-out");
+      setInterval(() => {
+        indicator.transition()
+       .duration(500)
+       .style("transform", "translateY(5px)")
+       .transition()
+       .duration(500)
+       .style("transform", "translateY(0px)");
+      }, 2000);
+}
 }
 
 // Afficher les départements d'une région
