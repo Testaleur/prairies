@@ -4,6 +4,7 @@ import { updateLegend } from "./legend.js";
 import { afficherPrairies } from "../map/prairies.js";
 import { updateHistogram_Type } from "./histogram_type.js";
 import { updateHistogram_Alti } from "./histogram_alti.js";
+import { updateHistogram_Surf } from "./histogram_surf.js";
 
 // Référence partagée à la dataMap courante, lisible depuis layers.js
 let _currentDataMap = new Map();
@@ -134,6 +135,7 @@ export function createSidebar(
     const counts = d3.rollup(finalParcelles, v => v.length, d => d.CODE_CULTU);
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), zoneName);
     updateHistogram_Alti(finalParcelles, zoneName);
+    updateHistogram_Surf(finalParcelles, zoneName);
   }
 
   // --- Écouteurs sur les selects ---
