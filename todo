@@ -1,13 +1,16 @@
 // urgent, partie principale du projet
 rajouter les prairies dans les arrondissement + permettre le zoom + flèches selon pente + gradient altitude + 3 boutons
-changer couleur quand on zoom sur chaque chose (bizarre quand même)
-Légende uniforme par zoom (france, région, département) (pas forcément cohérent)
+Faire marcher les filtres sur les prairies
+
 
 // urgent, fonctionnalités nécessaires
 ajouter des petits graphes : 
 histogramme sur la surface, (fait mais à modifier potentiellement)
+Ajouter légende histogramme alti
+Changer les couleurs des histogrammes (à déterminer)
+Retirer "afficher les pentes"
 scatterplot surface-altitude, 
-comparaison des surfaces par région/dept, 
+comparaison des surfaces par région/dept, nope
 afficher la région/dept sélectionné
 afficher les sources
 rajouter du texte, des explications
@@ -17,4 +20,6 @@ lorsqu'on clique sur un case à cocher désactivée, afficher message pour dire 
 
 // moins urgent
 supprimer les data inutiles
-trier les hist dans l'ordre décroissant
+trier les hist dans l'ordre décroissant type de prairie
+changer couleur quand on zoom sur chaque chose (bizarre quand même)
+Légende uniforme par zoom (france, région, département) (pas forcément cohérent)
