@@ -1,17 +1,16 @@
 // urgent, partie principale du projet
 rajouter les prairies dans les arrondissement + permettre le zoom + flèches selon pente + gradient altitude + 3 boutons
-changer couleur quand on zoom sur chaque chose
-Légende uniforme par zoom (france, région, département)
+changer couleur quand on zoom sur chaque chose (bizarre quand même)
+Légende uniforme par zoom (france, région, département) (pas forcément cohérent)
 
 // urgent, fonctionnalités nécessaires
 ajouter des petits graphes : 
-histogramme sur la surface, 
+histogramme sur la surface, (fait mais à modifier potentiellement)
 scatterplot surface-altitude, 
 comparaison des surfaces par région/dept, 
 afficher la région/dept sélectionné
 afficher les sources
 rajouter du texte, des explications
-ajouter une flèche vers le bas, en bas à gauche
 texte explicatif filtre + savoir qu'on peut cliquer sur les régions
 bug : l'échelle de couleur se casse momentanément lorsque l'on est dans une région et que l'on change le type de prairie (tout devient blanc) ?? Pas reproduit
 lorsqu'on clique sur un case à cocher désactivée, afficher message pour dire de cliquer sur un arrondissement d'abord
