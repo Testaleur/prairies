@@ -108,6 +108,39 @@ export function showRegions(regionsLayer, regionsData, currentDataMap, svg, path
        .style("transform", "translateY(0px)");
       }, 2000);
 }
+
+
+// On vérifie si les sources n'existent pas déjà pour éviter les doublons
+if (mapContainer.select(".map-sources").empty()) {
+  const sources = mapContainer.append("div")
+    .attr("class", "map-sources")
+    .style("position", "absolute")
+    .style("bottom", "10px") // Aligné avec le bas de l'indicateur de gauche
+    .style("right", "10px")  // Positionné à DROITE
+    .style("z-index", "1000")
+    .style("font-size", "11px")
+    .style("color", "#999")   // Gris clair
+    .style("text-align", "right") // Aligne le texte à droite dans le bloc
+    .style("display", "flex")
+    .style("flex-direction", "column")
+    .style("gap", "2px");
+
+  // Premier lien : IGN
+  sources.append("a")
+    .attr("href", "https://geoservices.ign.fr/documentation/donnees/vecteur/rpg")
+    .attr("target", "_blank")
+    .style("color", "inherit")
+    .style("text-decoration", "underline")
+    .text("geoservices.ign");
+
+  // Second lien : Data.gouv
+  sources.append("a")
+    .attr("href", "https://entrepot.recherche.data.gouv.fr/dataverse/RPG_sol_climat")
+    .attr("target", "_blank")
+    .style("color", "inherit")
+    .style("text-decoration", "underline")
+    .text("entrepot.recherche.data.gouv");
+}
 }
 
 // Afficher les départements d'une région
