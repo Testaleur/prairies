@@ -22,7 +22,8 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
     const container = d3.select("#histogram-alti-container");
     const width = container.node().clientWidth;
     const height = 350;
-    const margin = { top: 20, right: 30, bottom: 60, left: 60 };
+    // On augmente la marge bottom à 80 pour laisser de la place au titre d'axe
+    const margin = { top: 20, right: 30, bottom: 80, left: 60 };
 
     container.selectAll("*").remove();
 
@@ -31,7 +32,7 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
         .attr("height", height);
 
     // --- Calcul des tranches d'altitude ---
-    const BIN_SIZE = 200; // largeur de chaque tranche en mètres
+    const BIN_SIZE = 200; 
     const alts = parcelles.map(p => +p.alt_mean).filter(a => !isNaN(a));
 
     if (alts.length === 0) {
@@ -46,7 +47,6 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
     const minAlt = Math.floor(d3.min(alts) / BIN_SIZE) * BIN_SIZE;
     const maxAlt = Math.ceil(d3.max(alts) / BIN_SIZE) * BIN_SIZE;
 
-    // Créer toutes les tranches
     const bins = [];
     for (let low = minAlt; low < maxAlt; low += BIN_SIZE) {
         const high = low + BIN_SIZE;
@@ -72,11 +72,11 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
         .attr("x", b => x(b.label))
         .attr("y", b => y(b.count))
         .attr("width", x.bandwidth())
-        .attr("height", b => y(0) - y(b.count))
-        .attr("fill", "#27ae60")
+        .attr("height", b => y(0) - y(d3.max([0, b.count])))
+        .attr("fill", "#2980b9")
         .style("cursor", "pointer")
         .on("mouseover", (event, b) => {
-            d3.select(event.currentTarget).attr("fill", "#1e8449");
+            d3.select(event.currentTarget).attr("fill", "#1f6391");
             histoTooltip
                 .style("opacity", 1)
                 .html(`<strong>${b.label} m</strong><br/>${b.count.toLocaleString("fr-FR")} parcelles`);
@@ -87,7 +87,7 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
                 .style("top", (event.pageY - 28) + "px");
         })
         .on("mouseout", (event) => {
-            d3.select(event.currentTarget).attr("fill", "#27ae60");
+            d3.select(event.currentTarget).attr("fill", "#2980b9");
             histoTooltip.style("opacity", 0);
         });
 
@@ -99,6 +99,16 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
         .attr("transform", "rotate(-25)")
         .style("text-anchor", "end")
         .style("font-size", "11px");
+
+    // --- Label Axe X (TITRE AJOUTÉ ICI) ---
+    svg.append("text")
+        .attr("x", (width - margin.left - margin.right) / 2 + margin.left)
+        .attr("y", height - 15) // Positionné près du bord bas
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .style("fill", "#333")
+        .text("Altitude (m)");
 
     // --- Axe Y ---
     svg.append("g")

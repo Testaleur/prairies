@@ -32,7 +32,7 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
         .attr("width", width)
         .attr("height", height);
 
-    // 1. Préparation des données (on ignore les valeurs nulles ou aberrantes)
+    // 1. Préparation des données
     const surfs = parcelles.map(p => +p.SURF_PARC).filter(s => !isNaN(s) && s > 0);
 
     if (surfs.length === 0) {
@@ -44,8 +44,7 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
         return;
     }
 
-    // 2. Définition des seuils "intelligents"
-    // On crée des tranches fines au début (0, 1, 2, 5...) et larges à la fin
+    // 2. Définition des seuils personnalisés pour l'axe X
     const maxVal = d3.max(surfs);
     const thresholds = [0, 20, 50, 100, 200, 500, 1000, 6500];
 
@@ -53,7 +52,7 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
         .domain([0, 6500])
         .thresholds(thresholds);
 
-    const bins = binner(surfs).filter(d => d.x0 !== d.x1); // Éviter les bins vides de largeur nulle
+    const bins = binner(surfs).filter(d => d.x0 !== d.x1);
 
     // 3. Échelles
     const x = d3.scaleBand()
@@ -61,9 +60,8 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
         .range([margin.left, width - margin.right])
         .padding(0.2);
 
-    // Utilisation de scaleSqrt (racine carrée) pour l'axe Y 
-    // Cela permet de mieux voir les petites barres quand la première est très haute
-    const y = d3.scaleSqrt() 
+    // Axe Y en échelle LINEAIRE
+    const y = d3.scaleLinear() 
         .domain([0, d3.max(bins, d => d.length) || 1]).nice()
         .range([height - margin.bottom, margin.top]);
 
@@ -76,10 +74,10 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
         .attr("y", d => y(d.length))
         .attr("width", x.bandwidth())
         .attr("height", d => y(0) - y(d.length))
-        .attr("fill", "#27ae60")
+        .attr("fill", "#f39c12")
         .style("cursor", "pointer")
         .on("mouseover", (event, d) => {
-            d3.select(event.currentTarget).attr("fill", "#1e8449");
+            d3.select(event.currentTarget).attr("fill", "#d35400");
             histoTooltip
                 .style("opacity", 1)
                 .html(`
@@ -93,11 +91,11 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
                 .style("top", (event.pageY - 30) + "px");
         })
         .on("mouseout", (event) => {
-            d3.select(event.currentTarget).attr("fill", "#27ae60");
+            d3.select(event.currentTarget).attr("fill", "#f39c12");
             histoTooltip.style("opacity", 0);
         });
 
-    // 5. Axe X (Labels tranches)
+    // 5. Axe X
     svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(x))
@@ -106,21 +104,23 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
         .style("text-anchor", "end")
         .style("font-size", "11px");
 
-    // 6. Axe Y (Nombre de parcelles)
+    // 6. Axe Y (Linéaire)
     svg.append("g")
         .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(8).tickFormat(d3.format("~s"))); // Format compact (ex: 10k)
+        .call(d3.axisLeft(y).ticks(8).tickFormat(d3.format("~s")));
 
-    // Label horizontal pour l'unité de l'axe X
+    // Labels des axes
     svg.append("text")
-        .attr("x", width - margin.right)
-        .attr("y", height - margin.bottom + 40)
-        .attr("text-anchor", "end")
+    // --- Label Axe X (TITRE AJOUTÉ ICI) ---
+    svg.append("text")
+        .attr("x", (width - margin.left - margin.right) / 2 + margin.left)
+        .attr("y", height - 15) // Positionné près du bord bas
+        .attr("text-anchor", "middle")
         .style("font-size", "12px")
-        .style("fill", "#666")
-        .text("Hectares (ha)");
+        .style("font-weight", "bold")
+        .style("fill", "#333")
+        .text("Surface (ha)");
 
-    // Label vertical pour l'axe Y
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -(height / 2))

@@ -1,5 +1,4 @@
-// histogram_type.js
-export const labelsTraduction = {  // Ajout de export ici
+export const labelsTraduction = {  
     "PPH": "Prairies permanentes",
     "SPH": "Surfaces pastorales (herbe)",
     "SPL": "Surfaces pastorales (fourrage)",
@@ -7,7 +6,7 @@ export const labelsTraduction = {  // Ajout de export ici
     "CEE": "Chênaie"
 };
 
-// Tooltip partagé, créé une seule fois dans le DOM
+// Tooltip partagé (inchangé)
 let histoTooltip = d3.select("#histogram-tooltip");
 if (histoTooltip.empty()) {
     histoTooltip = d3.select("body")
@@ -30,7 +29,7 @@ export function updateHistogram_Type(data, zoneName = "France") {
     const container = d3.select("#histogram-container");
     const width = container.node().clientWidth;
     const height = 350;
-    const margin = {top: 20, right: 30, bottom: 100, left: 60};
+    const margin = {top: 20, right: 30, bottom: 100, left: 70};
 
     container.selectAll("*").remove();
 
@@ -38,10 +37,11 @@ export function updateHistogram_Type(data, zoneName = "France") {
         .attr("width", width)
         .attr("height", height);
 
+    // --- MODIFICATION ICI : TRI DÉCROISSANT ---
     const formattedData = data.map(d => ({
         type: labelsTraduction[d.type] || d.type,
         count: d.count
-    }));
+    })).sort((a, b) => b.count - a.count); // Trie du plus grand au plus petit
 
     const x = d3.scaleBand()
         .domain(formattedData.map(d => d.type))
@@ -79,7 +79,7 @@ export function updateHistogram_Type(data, zoneName = "France") {
             histoTooltip.style("opacity", 0);
         });
 
-    // Axe X avec rotation pour la lisibilité
+    // Axe X avec rotation
     svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(x))
@@ -92,4 +92,14 @@ export function updateHistogram_Type(data, zoneName = "France") {
     svg.append("g")
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(y).ticks(5));
+
+    // Label axe Y
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -(height / 2))
+        .attr("y", 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#666")
+        .text("Nombre de parcelles");
 }
