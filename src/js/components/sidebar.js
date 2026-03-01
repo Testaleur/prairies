@@ -168,7 +168,7 @@ export function createSidebar(
   // boutons de filtre
   addCheckboxListeners(svg, allParcelles, path, arrLayer);
   // désactivés tant que l'on n'est pas dans un arrondissement
-  // disableButtons();
+  disableButtons();
 }
 
 // --- Couches carte ---
@@ -226,7 +226,7 @@ export function disableButtons() {
   d3.select("#checkbox-group")
     .selectAll("input[type='checkbox']")
     .property("checked", false)
-    .attr("disabled", "disabled");
+    // .attr("disabled", "disabled");
 }
 
 export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
@@ -251,15 +251,17 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
 
   // afficher prairies
   boutonCheckPrairies.addEventListener("change", function() {
-  if (this.checked) {
-      let currentArrData = getCurrentArrData()
+    if (this.checked) {
+      let currentArrData = getCurrentArrData();
       afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer);
       if(!currentArrData){
         popupGeneral.style.display = "flex";
         this.checked = false;
+        boutonCheckAlt.checked = false;
       }
     } else {
       svg.selectAll(".prairie-layer").remove();
+      boutonCheckAlt.checked = false;
     }
   })
 
@@ -270,12 +272,14 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
       this.checked = false;
       return;
     }
-
+    
     if (boutonCheckPrairies.checked) {
+      let currentArrData = getCurrentArrData();
       if (this.checked) {
-        // to do
+        const withAlt = true;
+        afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt);
       } else {
-        svg.selectAll(".prairie-layer").remove();
+        afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer);
       }
     }
   });

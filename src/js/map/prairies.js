@@ -1,6 +1,6 @@
 import proj4 from "proj4";
 
-export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer) {
+export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt = false) {
   console.log("Affichage des prairies pour l'arrondissement :", currentArrData ? currentArrData.properties.nom : "Aucun arrondissement sélectionné");
   // Supprimer les anciennes parcelles
   svg.selectAll(".prairie-layer").remove();
@@ -14,7 +14,20 @@ export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLay
   console.log(`Nombre de parcelles à afficher : ${parcellesFiltrees.length}`);
   console.log(`Ex parcelle à afficher : ${JSON.stringify(parcellesFiltrees[0])}`);
 
-  // Ajouter les chemins
+    // échelle altitude si besoin
+  let colorScale = null;
+  if (withAlt) {
+    const altitudes = parcellesFiltrees
+      .map(d => +d.alt_mean)
+      .filter(v => !isNaN(v));
+    const minAlt = d3.min(altitudes);
+    const maxAlt = d3.max(altitudes);
+    colorScale = d3.scaleSequential()
+      .domain([minAlt, maxAlt])
+      .interpolator(d3.interpolateViridis);
+  }
+
+  // Ajouter les chemins et dessiner
   prairieLayer.selectAll("path")
   .data(parcellesFiltrees, d => d.id_parcel)
   .join("path")
@@ -31,7 +44,12 @@ export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLay
       // Use D3 geoPath with your projection
       return path(geojson);
     })
-    .attr("fill", "rgba(34,139,34,0.5)")
+    .attr("fill", d => {
+      if (withAlt && colorScale && !isNaN(d.alt_mean)) {
+        return colorScale(+d.alt_mean);
+      }
+      return "rgba(34,139,34,0.5)"; // default green
+    })
     .attr("stroke", "#006400")
     .attr("stroke-width", 0.3)
     .on("click", (event, d) => {
