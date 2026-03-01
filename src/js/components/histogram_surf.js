@@ -121,12 +121,14 @@ export function updateHistogram_Surf(parcelles, zoneName = "France") {
         .style("fill", "#333")
         .text("Surface (ha)");
 
+    // --- Label axe Y (Ajouté ici) ---
     svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -(height / 2))
-        .attr("y", 20)
+        .attr("transform", "rotate(-90)") // Rotation pour l'aligner verticalement
+        .attr("x", -(height / 2))         // Centré par rapport à la hauteur
+        .attr("y", 20)                    // Positionné à gauche de l'axe
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
-        .style("fill", "#666")
+        .style("font-weight", "bold")
+        .style("fill", "#333")
         .text("Nombre de parcelles");
 }

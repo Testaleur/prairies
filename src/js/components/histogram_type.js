@@ -93,13 +93,14 @@ export function updateHistogram_Type(data, zoneName = "France") {
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(y).ticks(5));
 
-    // Label axe Y
+    // --- Label axe Y (Ajouté ici) ---
     svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -(height / 2))
-        .attr("y", 20)
+        .attr("transform", "rotate(-90)") // Rotation pour l'aligner verticalement
+        .attr("x", -(height / 2))         // Centré par rapport à la hauteur
+        .attr("y", 20)                    // Positionné à gauche de l'axe
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
-        .style("fill", "#666")
+        .style("font-weight", "bold")
+        .style("fill", "#333")
         .text("Nombre de parcelles");
 }

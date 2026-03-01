@@ -5,6 +5,7 @@ import { enableButtons } from "../components/sidebar.js";
 import { updateHistogram_Type } from "../components/histogram_type.js";
 import { updateHistogram_Alti } from "../components/histogram_alti.js";
 import { updateHistogram_Surf } from "../components/histogram_surf.js";
+import { updateScatter_AltiSurf } from "../components/scatter_alti_surf.js";
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
@@ -46,6 +47,7 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
     updateHistogram_Alti(filtered, d.properties.nom);
     updateHistogram_Surf(filtered, d.properties.nom);
+    updateScatter_AltiSurf(filtered, d.properties.nom);
   }
 }
 
@@ -76,6 +78,7 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
     updateHistogram_Alti(filtered, d.properties.nom);
     updateHistogram_Surf(filtered, d.properties.nom);
+    updateScatter_AltiSurf(filtered, d.properties.nom);
   }
 }
 

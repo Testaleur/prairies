@@ -23,7 +23,7 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
     const width = container.node().clientWidth;
     const height = 350;
     // On augmente la marge bottom à 80 pour laisser de la place au titre d'axe
-    const margin = { top: 20, right: 30, bottom: 80, left: 60 };
+    const margin = { top: 20, right: 30, bottom: 80, left: 70 };
 
     container.selectAll("*").remove();
 
@@ -115,13 +115,14 @@ export function updateHistogram_Alti(parcelles, zoneName = "France") {
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(y).ticks(5));
 
-    // --- Label axe Y ---
+    // --- Label axe Y (Ajouté ici) ---
     svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -(height / 2))
-        .attr("y", 15)
+        .attr("transform", "rotate(-90)") // Rotation pour l'aligner verticalement
+        .attr("x", -(height / 2))         // Centré par rapport à la hauteur
+        .attr("y", 20)                    // Positionné à gauche de l'axe
         .attr("text-anchor", "middle")
-        .style("font-size", "11px")
-        .style("fill", "#555")
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .style("fill", "#333")
         .text("Nombre de parcelles");
 }
