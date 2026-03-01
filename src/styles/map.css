@@ -53,6 +53,11 @@ path {
   fill: #502c2c;
 }
 
+.legend-group-alt text {
+  font-family: sans-serif;
+  fill: #502c2c;
+}
+
 #histogram-section {
     flex: 1; /* L'histogramme prend le 1/3 restant */
     background: white;

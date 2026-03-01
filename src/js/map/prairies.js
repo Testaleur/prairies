@@ -1,4 +1,5 @@
 import proj4 from "proj4";
+import { showLegendAlt } from "../components/legend.js"
 
 export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt = false) {
   console.log("Affichage des prairies pour l'arrondissement :", currentArrData ? currentArrData.properties.nom : "Aucun arrondissement sélectionné");
@@ -25,6 +26,8 @@ export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLay
     colorScale = d3.scaleSequential()
       .domain([minAlt, maxAlt])
       .interpolator(d3.interpolateViridis);
+
+    showLegendAlt(svg, minAlt, maxAlt, "Altitude moyenne (m)");
   }
 
   // Ajouter les chemins et dessiner

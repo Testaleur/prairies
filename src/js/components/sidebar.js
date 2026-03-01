@@ -261,6 +261,7 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
       }
     } else {
       svg.selectAll(".prairie-layer").remove();
+      svg.selectAll(".legend-group-alt").remove();
       boutonCheckAlt.checked = false;
     }
   })
@@ -279,6 +280,7 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
         const withAlt = true;
         afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt);
       } else {
+        svg.selectAll(".legend-group-alt").remove();
         afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer);
       }
     }
