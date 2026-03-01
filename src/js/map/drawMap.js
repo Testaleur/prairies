@@ -7,6 +7,8 @@ import { showRegions } from "./layers.js";
 import { createZoomControls } from "../components/zoomControls.js";
 import { updateHistogram_Type } from "../components/histogram_type.js";
 import { updateHistogram_Alti } from "../components/histogram_alti.js";
+import { updateHistogram_Surf } from "../components/histogram_surf.js";
+import { updateScatter_AltiSurf } from "../components/scatter_alti_surf.js";
 
 // Variables globales pour le filtrage
 let allParcelles = []; 
@@ -74,6 +76,8 @@ export function drawMap(svg, tooltip, width, height) {
     const counts = d3.rollup(parcellesData, v => v.length, d => d.CODE_CULTU);
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), "France");
     updateHistogram_Alti(parcellesData, "France");
+    updateHistogram_Surf(parcellesData, "France");
+    updateScatter_AltiSurf(parcellesData, "France");
     
     // --- Dessin des régions ---
     showRegions(regionsLayer, regionsData, currentDataMap, svg, path, initialScale, tooltip, zoom, deptsData, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls);

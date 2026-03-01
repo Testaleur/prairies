@@ -1,11 +1,13 @@
 import { updateLegend } from "./legend.js";
-import { showDepartments, showArrondissements } from "../map/layers.js";
+import { showDepartments, showArrondissements, updateZoneIndicator } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
 import { disablePanAndZoom } from "./zoomControls.js";
 import { disableButtons, hideLegend } from "./sidebar.js";
 import { updateHistogram_Type } from "./histogram_type.js";
 import { updateHistogram_Alti } from "./histogram_alti.js";
+import { updateHistogram_Surf } from "./histogram_surf.js";
+import { updateScatter_AltiSurf } from "./scatter_alti_surf.js";
 
 export function createBackButton(
   arrLayer,
@@ -65,6 +67,8 @@ export function createBackButton(
           const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
           updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), dept.properties.nom);
           updateHistogram_Alti(filtered, dept.properties.nom);
+          updateHistogram_Surf(filtered, dept.properties.nom);
+          updateScatter_AltiSurf(filtered, dept.properties.nom);
         }
       }
       zoomToFeature(path, svg, zoom, dept, 0.9);
@@ -100,6 +104,9 @@ export function createBackButton(
           const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
           updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), region.properties.nom);
           updateHistogram_Alti(filtered, region.properties.nom);
+          updateHistogram_Surf(filtered, region.properties.nom);
+          updateScatter_AltiSurf(filtered, region.properties.nom);
+          updateZoneIndicator(region.properties.nom);
         }
       }
       zoomToFeature(path, svg, zoom, region, 0.8);
@@ -127,6 +134,9 @@ export function createBackButton(
         const counts = d3.rollup(window.allParcellesData, v => v.length, d => d.CODE_CULTU);
         updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), "France");
         updateHistogram_Alti(window.allParcellesData, "France");
+        updateHistogram_Surf(window.allParcellesData, "France");
+        updateScatter_AltiSurf(window.allParcellesData, "France");
+        updateZoneIndicator("");
       }
 
       regionsLayer.selectAll("path")

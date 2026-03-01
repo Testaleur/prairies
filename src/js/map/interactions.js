@@ -1,9 +1,12 @@
-import { showDepartments, showArrondissements } from "./layers.js";
+import { showDepartments, showArrondissements, updateZoneIndicator } from "./layers.js";
 import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
 import { enablePanAndZoom } from "../components/zoomControls.js";
 import { enableButtons } from "../components/sidebar.js";
 import { updateHistogram_Type } from "../components/histogram_type.js";
 import { updateHistogram_Alti } from "../components/histogram_alti.js";
+import { updateHistogram_Surf } from "../components/histogram_surf.js";
+import { updateScatter_AltiSurf } from "../components/scatter_alti_surf.js";
+
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
@@ -44,6 +47,9 @@ export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, dept
     const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
     updateHistogram_Alti(filtered, d.properties.nom);
+    updateHistogram_Surf(filtered, d.properties.nom);
+    updateScatter_AltiSurf(filtered, d.properties.nom);
+    updateZoneIndicator(d.properties.nom);
   }
 }
 
@@ -73,6 +79,9 @@ export function zoomToDept(event, d, backButton, path, svg, zoom, arrLayer, arrD
     const counts = d3.rollup(filtered, v => v.length, d => d.CODE_CULTU);
     updateHistogram_Type(Array.from(counts, ([type, count]) => ({ type, count })), d.properties.nom);
     updateHistogram_Alti(filtered, d.properties.nom);
+    updateHistogram_Surf(filtered, d.properties.nom);
+    updateScatter_AltiSurf(filtered, d.properties.nom);
+    updateZoneIndicator(d.properties.nom);
   }
 }
 
@@ -86,5 +95,7 @@ export function zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomC
   backButton.text("← Retour au Département");
   zoomToFeature(path, svg, zoom, d, 0.9);
   arrLayer.selectAll("path").transition().duration(750).style("opacity", node => node === d ? 1 : 0.1);
+  const dept = getCurrentDeptData();
+  if (dept) updateZoneIndicator(dept.properties.nom);
 }
   
