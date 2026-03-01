@@ -53,3 +53,13 @@ hr {
   justify-content: space-between;
   gap: 10px;
 }
+
+#zone-indicator{
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  font-weight: bold;
+  font-size: 18px;
+  color: #2c3e50;
+}

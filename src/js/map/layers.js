@@ -119,7 +119,7 @@ if (mapContainer.select(".map-sources").empty()) {
     .style("right", "10px")  // Positionné à DROITE
     .style("z-index", "1000")
     .style("font-size", "11px")
-    .style("color", "#999")   // Gris clair
+    .style("color", "#444444")   // Gris clair
     .style("text-align", "right") // Aligne le texte à droite dans le bloc
     .style("display", "flex")
     .style("flex-direction", "column")
@@ -256,9 +256,9 @@ export function showArrondissements(deptCode, backButton, deptsLayer, arrLayer, 
     })
     .on("click", (event, d) => {
       if(!isShowPrairiesChecked()) {
-        zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomControls);
         // reset the color to white
         d3.select(event.currentTarget).attr("fill", "#fff");
+        zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomControls);
       }
     })
     .transition().duration(500)
@@ -277,9 +277,9 @@ function getSelectedTypeName() {
 // layers.js
 export function updateZoneIndicator(name) {
     const indicator = d3.select("#zone-indicator");
-    // Si name est vide ou "France", on n'affiche rien
+    // Si name est vide ou "France", on affiche le texte de base
     if (!name || name === "France") {
-        indicator.text("");
+        indicator.text("Sélectionnez une région.");
     } else {
         indicator.text(name);
     }

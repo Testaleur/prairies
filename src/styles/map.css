@@ -54,12 +54,12 @@ path {
 /* --- LÉGENDE MAP --- */
 .legend-group text {
   font-family: sans-serif;
-  fill: #502c2c;
+  fill: #2c3e50;
 }
 
 .legend-group-alt text {
   font-family: sans-serif;
-  fill: #502c2c;
+  fill: #2c3e50;
 }
 
 #histogram-section {

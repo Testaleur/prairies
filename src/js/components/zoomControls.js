@@ -8,12 +8,13 @@ export function createZoomControls(svg, zoom) {
 
   const buttonSize = 32;
   const margin = 15;
+  const marginBottom = 40;
 
   function updatePosition() {
     const { width, height } = svg.node().getBoundingClientRect();
     container.attr(
       "transform",
-      `translate(${width - buttonSize - margin}, ${height - 2 * buttonSize - margin})`
+      `translate(${width - buttonSize - margin}, ${height - 3 * buttonSize - margin - marginBottom})`
     );
   }
 
@@ -66,6 +67,30 @@ export function createZoomControls(svg, zoom) {
     .style("-moz-user-select", "none")
     .style("-ms-user-select", "none")
     .text("-");
+
+  const resetZoom = container.append("g")
+    .attr("class", "zoom-in")
+    .attr("transform", `translate(0, ${2*(buttonSize + 6)})`)
+    .style("cursor", "pointer");
+
+  resetZoom.append("rect")
+    .attr("width", buttonSize)
+    .attr("height", buttonSize)
+    .attr("rx", 6)
+    .attr("fill", "#fff")
+    .attr("stroke", "#333");
+
+  resetZoom.append("text")
+    .attr("x", buttonSize / 2)
+    .attr("y", buttonSize / 2 + 6)
+    .attr("text-anchor", "middle")
+    .attr("font-size", 24)
+    .attr("font-weight", "bold")
+    .style("user-select", "none")
+    .style("-webkit-user-select", "none")
+    .style("-moz-user-select", "none")
+    .style("-ms-user-select", "none")
+    .text("⟳");
 
   zoomIn.on("click", () => {
     svg.transition().duration(300).call(zoom.scaleBy, 1.3);
