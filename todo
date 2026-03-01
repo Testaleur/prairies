@@ -1,22 +1,17 @@
 // urgent, partie principale du projet
-rajouter les prairies dans les arrondissement + permettre le zoom + flèches selon pente + gradient altitude + 3 boutons
+rajouter du texte, des explications
 Faire marcher les filtres sur les prairies
-
 
 // urgent, fonctionnalités nécessaires
 ajouter des petits graphes : 
 histogramme sur la surface, (fait mais à modifier potentiellement)
 Ajouter légende histogramme alti
 Changer les couleurs des histogrammes (à déterminer)
-Retirer "afficher les pentes"
 scatterplot surface-altitude, 
-comparaison des surfaces par région/dept, nope
-afficher la région/dept sélectionné
-afficher les sources
-rajouter du texte, des explications
 texte explicatif filtre + savoir qu'on peut cliquer sur les régions
 bug : l'échelle de couleur se casse momentanément lorsque l'on est dans une région et que l'on change le type de prairie (tout devient blanc) ?? Pas reproduit
 lorsqu'on clique sur un case à cocher désactivée, afficher message pour dire de cliquer sur un arrondissement d'abord
+bug : échelle du scatterplot
 
 // moins urgent
 supprimer les data inutiles
