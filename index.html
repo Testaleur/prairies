@@ -4,13 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Carte des prairies</title>
-    <script type="module" crossorigin src="/prairies/assets/index-HAo4utG3.js"></script>
-    <link rel="stylesheet" crossorigin href="/prairies/assets/index-BMkRFncc.css">
+    <script type="module" crossorigin src="/prairies/assets/index-vMYkdbaM.js"></script>
+    <link rel="stylesheet" crossorigin href="/prairies/assets/index-C5UZrCrI.css">
   </head>
   <body>
     <div id="app-container">
     <div id="map-container">
     <header id="map-title">Analyse des Prairies en France</header>
+    <div id="zone-indicator">
+      Sélectionnez une région.
+    </div>
     <div id="tooltip" class="tooltip"></div> <div id="map"></div>
     
     <div id="histogram-section">
@@ -21,6 +24,15 @@
         <h3>Répartition par altitude</h3>
         <div id="histogram-alti-container"></div>
     </div>
+    <div id="histogram-surf-section">
+      <h3>Répartition par surface de prairie</h3>
+    <div id="histogram-surf-container"></div>
+    </div>
+    <div id="scatter-section">
+    <h3>Corrélation Altitude / Surface</h3>
+    <div id="scatter-container"></div>
+
+</div>
 </div>
     
 
@@ -67,12 +79,28 @@
         <hr>
 
         <div class="control-group" id = "checkbox-group">
-          <label><input type="checkbox" id="check-prairies" disabled> Afficher les prairies</label>
-          <label><input type="checkbox" id="check-pente" disabled> Afficher les pentes</label>
-          <label><input type="checkbox" id="check-alt" disabled> Afficher l'altitude (dégradé)</label>
+          <label><input type="checkbox" id="check-prairies"> Afficher les prairies</label>
+          <label><input type="checkbox" id="check-alt"> Afficher l'altitude</label>
         </div>
 
       </aside>
+
+    </div>
+
+    <div id="warningPopupAlt" class="popup-overlay">
+      <div class="popup-box sidebar-style">
+        <h3>Action requise :</h3>
+        <p>Merci de cocher <strong>Afficher prairies</strong> avant d'afficher les altitudes.</p>
+        <button id="closePopup">OK</button>
+      </div>
+    </div>
+
+     <div id="warningPopupGeneral" class="popup-overlay">
+      <div class="popup-box sidebar-style">
+        <h3>Action requise :</h3>
+        <p>Merci de <strong>sélectionner un arrondissement</strong> avant d'afficher les prairies / altitudes.</p>
+        <button id="closePopupGen">OK</button>
+      </div>
     </div>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
