@@ -127,7 +127,7 @@ if (mapContainer.select(".map-sources").empty()) {
 
   // Premier lien : IGN
   sources.append("a")
-    .attr("href", "https://geoservices.ign.fr/documentation/donnees/vecteur/rpg")
+    .attr("href", "https://geoservices.ign.fr/rpg")
     .attr("target", "_blank")
     .style("color", "inherit")
     .style("text-decoration", "underline")
