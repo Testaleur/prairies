@@ -1,5 +1,5 @@
 import { updateLegend } from "./legend.js";
-import { showDepartments, showArrondissements } from "../map/layers.js";
+import { showDepartments, showArrondissements, updateZoneIndicator } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
 import { disablePanAndZoom } from "./zoomControls.js";
@@ -105,6 +105,7 @@ export function createBackButton(
           updateHistogram_Alti(filtered, region.properties.nom);
           updateHistogram_Surf(filtered, region.properties.nom);
           updateScatter_AltiSurf(filtered, region.properties.nom);
+          updateZoneIndicator(region.properties.nom);
         }
       }
       zoomToFeature(path, svg, zoom, region, 0.8);
@@ -134,6 +135,7 @@ export function createBackButton(
         updateHistogram_Alti(window.allParcellesData, "France");
         updateHistogram_Surf(window.allParcellesData, "France");
         updateScatter_AltiSurf(window.allParcellesData, "France");
+        updateZoneIndicator("");
       }
 
       regionsLayer.selectAll("path")

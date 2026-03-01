@@ -273,3 +273,14 @@ function getSelectedTypeName() {
   const code = document.getElementById("prairie-type-select").value;
   return code === "ALL" ? "prairies" : (labelsTraduction[code] || code);
 }
+
+// layers.js
+export function updateZoneIndicator(name) {
+    const indicator = d3.select("#zone-indicator");
+    // Si name est vide ou "France", on n'affiche rien
+    if (!name || name === "France") {
+        indicator.text("");
+    } else {
+        indicator.text(name);
+    }
+}
