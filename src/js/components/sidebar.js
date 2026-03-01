@@ -168,7 +168,7 @@ export function createSidebar(
   // boutons de filtre
   addCheckboxListeners(svg, allParcelles, path, arrLayer);
   // désactivés tant que l'on n'est pas dans un arrondissement
-  disableButtons();
+  // disableButtons();
 }
 
 // --- Couches carte ---
@@ -230,11 +230,53 @@ export function disableButtons() {
 }
 
 export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
-  document.getElementById("check-prairies").addEventListener("change", function() {
+  // boutons
+  let boutonCheckPrairies = document.getElementById("check-prairies");
+  let boutonCheckAlt = document.getElementById("check-alt");
+  // popup 
+  const popupAlt = document.getElementById("warningPopupAlt");
+  const popupGeneral = document.getElementById("warningPopupGeneral");
+  const closePopup = document.getElementById("closePopup");
+  const closePopupGen = document.getElementById("closePopupGen");
+
+  closePopup.addEventListener("click", () => {
+    popupAlt.style.display = "flex";
+    popupAlt.style.display = "none";
+  });
+
+  closePopupGen.addEventListener("click", () => {
+    popupGeneral.style.display = "flex";
+    popupGeneral.style.display = "none";
+  });
+
+  // afficher prairies
+  boutonCheckPrairies.addEventListener("change", function() {
   if (this.checked) {
-      afficherPrairies(svg, allParcelles, getCurrentArrData(), path, arrLayer);
+      let currentArrData = getCurrentArrData()
+      afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer);
+      if(!currentArrData){
+        popupGeneral.style.display = "flex";
+        this.checked = false;
+      }
     } else {
       svg.selectAll(".prairie-layer").remove();
     }
   })
+
+  // afficher altitude
+  boutonCheckAlt.addEventListener("change", function () {
+    if (!boutonCheckPrairies.checked && this.checked) {
+      popupAlt.style.display = "flex";
+      this.checked = false;
+      return;
+    }
+
+    if (boutonCheckPrairies.checked) {
+      if (this.checked) {
+        // to do
+      } else {
+        svg.selectAll(".prairie-layer").remove();
+      }
+    }
+  });
 };
