@@ -3,7 +3,7 @@ import { showDepartments, showArrondissements } from "../map/layers.js";
 import { zoomToFeature } from "../map/interactions.js";
 import { setCurrentRegionData, getCurrentRegionData, setCurrentView, getCurrentView, getCurrentDeptData, setCurrentDeptData, setCurrentArrData } from "../config.js";
 import { disablePanAndZoom } from "./zoomControls.js";
-import { disableButtons } from "./sidebar.js";
+import { disableButtons, hideLegend } from "./sidebar.js";
 import { updateHistogram_Type } from "./histogram_type.js";
 import { updateHistogram_Alti } from "./histogram_alti.js";
 
@@ -40,7 +40,8 @@ export function createBackButton(
       setCurrentView("DEPARTEMENT");
       zoomControls.updateVisibility();
       disablePanAndZoom(svg);
-      disableButtons()
+      disableButtons();
+      hideLegend(svg);
       backButton.text("← Retour à la Région");
       arrLayer.selectAll("path").remove();
       const dept = getCurrentDeptData();

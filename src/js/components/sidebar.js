@@ -229,6 +229,10 @@ export function disableButtons() {
     // .attr("disabled", "disabled");
 }
 
+export function hideLegend(svg) {
+  svg.selectAll(".legend-group-alt").remove();
+}
+
 export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
   // boutons
   let boutonCheckPrairies = document.getElementById("check-prairies");
@@ -261,7 +265,7 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
       }
     } else {
       svg.selectAll(".prairie-layer").remove();
-      svg.selectAll(".legend-group-alt").remove();
+      hideLegend(svg);
       boutonCheckAlt.checked = false;
     }
   })
@@ -280,7 +284,7 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
         const withAlt = true;
         afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt);
       } else {
-        svg.selectAll(".legend-group-alt").remove();
+        hideLegend(svg)
         afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer);
       }
     }
