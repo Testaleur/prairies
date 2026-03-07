@@ -256,12 +256,15 @@ export function hideLegend(svg) {
 export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
   // boutons
   let boutonCheckPrairies = document.getElementById("check-prairies");
+  let boutonOuvrirExplications = document.getElementById("btnExplication")
   // let boutonCheckAlt = document.getElementById("check-alt");
   // popup 
   const popupAlt = document.getElementById("warningPopupAlt");
   const popupGeneral = document.getElementById("warningPopupGeneral");
+  const popupExplication = document.getElementById("popupExplications");
   const closePopup = document.getElementById("closePopup");
   const closePopupGen = document.getElementById("closePopupGen");
+  const closePopupExplications = document.getElementById("closePopupExplications");
 
   closePopup.addEventListener("click", () => {
     popupAlt.style.display = "flex";
@@ -272,6 +275,15 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
     popupGeneral.style.display = "flex";
     popupGeneral.style.display = "none";
   });
+
+  closePopupExplications.addEventListener("click", () => {
+    popupExplication.style.display = "flex";
+    popupExplication.style.display = "none";
+  })
+
+  boutonOuvrirExplications.addEventListener("click", () => {
+    popupExplication.style.display = "flex";
+  })
 
   // afficher prairies
   boutonCheckPrairies.addEventListener("change", function() {

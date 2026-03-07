@@ -124,6 +124,11 @@
   animation: popupFadeIn 0.18s ease-out;
 }
 
+#popupBoxExplications{
+  width: 600px;
+  height: auto;
+}
+
 .popup-box h3 {
   font-size: 1.2rem;
   color: #2c3e50;
