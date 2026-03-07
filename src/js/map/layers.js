@@ -124,23 +124,7 @@ if (mapContainer.select(".map-sources").empty()) {
     .style("display", "flex")
     .style("flex-direction", "column")
     .style("gap", "2px");
-
-  // Premier lien : IGN
-  sources.append("a")
-    .attr("href", "https://geoservices.ign.fr/rpg")
-    .attr("target", "_blank")
-    .style("color", "inherit")
-    .style("text-decoration", "underline")
-    .text("geoservices.ign");
-
-  // Second lien : Data.gouv
-  sources.append("a")
-    .attr("href", "https://entrepot.recherche.data.gouv.fr/dataverse/RPG_sol_climat")
-    .attr("target", "_blank")
-    .style("color", "inherit")
-    .style("text-decoration", "underline")
-    .text("entrepot.recherche.data.gouv");
-}
+  }
 }
 
 // Afficher les départements d'une région

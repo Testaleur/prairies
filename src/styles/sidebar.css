@@ -165,3 +165,27 @@
     transform: scale(1);
   }
 }
+
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-sources {
+  margin-top: auto;
+  margin-bottom: 50px;
+  font-size: 0.85em;
+  color: #555;
+  text-align: right;
+}
+
+.sidebar-sources a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.sources-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
