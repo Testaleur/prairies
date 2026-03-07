@@ -7,6 +7,3 @@ Ajouter légende histogramme alti
 bug : l'échelle de couleur se casse momentanément lorsque l'on est dans une région et 
 que l'on change le type de prairie (tout devient blanc) ?? Pas reproduit ?
 bug : échelle du scatterplot
-
-// moins urgent
-supprimer les data inutiles
