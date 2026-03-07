@@ -1,4 +1,4 @@
-import { getCurrentRegionData, getCurrentView, getCurrentDeptData, getCurrentArrData } from "../config";
+import { getCurrentRegionData, getCurrentView, getCurrentDeptData, getCurrentArrData, currentArrData } from "../config";
 import { processData } from "../map/dataProcessing.js";
 import { updateLegend } from "./legend.js";
 import { afficherPrairies } from "../map/prairies.js";
@@ -91,6 +91,17 @@ export function createSidebar(
         .interpolator(d3.interpolateGreens);
     }
 
+    // affichage prairies ?
+    let boutonCheckPrairies = document.getElementById("check-prairies");
+    let afficherLesPrairies = boutonCheckPrairies.checked;
+
+    // filtrer les parcelles selon choix
+    let filteredAllParcelles = allParcelles.filter(parcelle => {
+      return parcelle.alt_mean >= altMin 
+        && parcelle.alt_mean < altMax
+        && (prairieType == "ALL" || parcelle.CODE_CULTU == prairieType)
+    })
+
     // --- Mise à jour carte ---
     if (currentView === "REGION") {
       updateLegend(svg, newMaxDep, label);
@@ -101,6 +112,11 @@ export function createSidebar(
       updateRegionLayer(regionsLayer, currentDataMap, regionScale, propertyToUse);
       updateDeptLayer(deptsLayer, currentDataMap, depScale, propertyToUse);
       updateArrLayer(arrLayer, currentDataMap, arrScale, propertyToUse);
+    } else if (currentView === "ARRONDISSEMENT") {
+      updateLegend(svg, newMaxArr, label);
+      if(afficherLesPrairies){
+        afficherPrairies(svg, filteredAllParcelles, currentArrData, path, arrLayer)
+      }
     } else {
       // FRANCE
       updateLegend(svg, newMaxRegion, label);
@@ -240,7 +256,7 @@ export function hideLegend(svg) {
 export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
   // boutons
   let boutonCheckPrairies = document.getElementById("check-prairies");
-  let boutonCheckAlt = document.getElementById("check-alt");
+  // let boutonCheckAlt = document.getElementById("check-alt");
   // popup 
   const popupAlt = document.getElementById("warningPopupAlt");
   const popupGeneral = document.getElementById("warningPopupGeneral");
@@ -265,32 +281,32 @@ export function addCheckboxListeners(svg, allParcelles, path, arrLayer) {
       if(!currentArrData){
         popupGeneral.style.display = "flex";
         this.checked = false;
-        boutonCheckAlt.checked = false;
+        // boutonCheckAlt.checked = false;
       }
     } else {
       svg.selectAll(".prairie-layer").remove();
       hideLegend(svg);
-      boutonCheckAlt.checked = false;
+      // boutonCheckAlt.checked = false;
     }
   })
 
-  // afficher altitude
-  boutonCheckAlt.addEventListener("change", function () {
-    if (!boutonCheckPrairies.checked && this.checked) {
-      popupAlt.style.display = "flex";
-      this.checked = false;
-      return;
-    }
+  // afficher altitude -> toujours affichée finalement
+  // boutonCheckAlt.addEventListener("change", function () {
+  //   if (!boutonCheckPrairies.checked && this.checked) {
+  //     popupAlt.style.display = "flex";
+  //     this.checked = false;
+  //     return;
+  //   }
     
-    if (boutonCheckPrairies.checked) {
-      let currentArrData = getCurrentArrData();
-      if (this.checked) {
-        const withAlt = true;
-        afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt);
-      } else {
-        hideLegend(svg)
-        afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer);
-      }
-    }
-  });
+  //   if (boutonCheckPrairies.checked) {
+  //     let currentArrData = getCurrentArrData();
+  //     if (this.checked) {
+  //       const withAlt = true;
+  //       afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt);
+  //     } else {
+  //       hideLegend(svg)
+  //       afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer);
+  //     }
+  //   }
+  // });
 };

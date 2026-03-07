@@ -1,5 +1,5 @@
 import { showDepartments, showArrondissements, updateZoneIndicator } from "./layers.js";
-import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView } from "../config.js";
+import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView, getCurrentDeptData } from "../config.js";
 import { enablePanAndZoom } from "../components/zoomControls.js";
 import { enableButtons } from "../components/sidebar.js";
 import { updateHistogram_Type } from "../components/histogram_type.js";

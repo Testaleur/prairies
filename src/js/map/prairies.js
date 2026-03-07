@@ -1,7 +1,7 @@
 import proj4 from "proj4";
 import { showLegendAlt } from "../components/legend.js"
 
-export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt = false) {
+export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLayer, withAlt = true) {
   console.log("Affichage des prairies pour l'arrondissement :", currentArrData ? currentArrData.properties.nom : "Aucun arrondissement sélectionné");
   // Supprimer les anciennes parcelles
   svg.selectAll(".prairie-layer").remove();
@@ -41,7 +41,7 @@ export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLay
       // Build a GeoJSON polygon object
       const geojson = {
         type: "Polygon",
-        coordinates: [coords] // D3 expects [ [ [x, y], ... ] ] for polygons
+        coordinates: [coords]
       };
 
       // Use D3 geoPath with your projection
@@ -51,7 +51,7 @@ export function afficherPrairies(svg, allParcelles, currentArrData, path, arrLay
       if (withAlt && colorScale && !isNaN(d.alt_mean)) {
         return colorScale(+d.alt_mean);
       }
-      return "rgba(34,139,34,0.5)"; // default green
+      return "rgba(34,139,34,0.5)";
     })
     .attr("stroke", "#006400")
     .attr("stroke-width", 0.3)
