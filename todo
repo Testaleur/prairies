@@ -3,18 +3,10 @@ rajouter un fond de carte (bouton optionnel)
 check retours dnas le sheet + dans le mail
 
 // urgent, fonctionnalités nécessaires
-ajouter des petits graphes : 
-histogramme sur la surface, (fait mais à modifier potentiellement)
 Ajouter légende histogramme alti
-Changer les couleurs des histogrammes (à déterminer)
-scatterplot surface-altitude, 
-texte explicatif filtre + savoir qu'on peut cliquer sur les régions
-bug : l'échelle de couleur se casse momentanément lorsque l'on est dans une région et que l'on change le type de prairie (tout devient blanc) ?? Pas reproduit
-lorsqu'on clique sur un case à cocher désactivée, afficher message pour dire de cliquer sur un arrondissement d'abord
+bug : l'échelle de couleur se casse momentanément lorsque l'on est dans une région et 
+que l'on change le type de prairie (tout devient blanc) ?? Pas reproduit ?
 bug : échelle du scatterplot
 
 // moins urgent
 supprimer les data inutiles
-trier les hist dans l'ordre décroissant type de prairie
-changer couleur quand on zoom sur chaque chose (bizarre quand même)
-Légende uniforme par zoom (france, région, département) (pas forcément cohérent)
