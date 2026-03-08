@@ -1,4 +1,4 @@
-import { getCurrentView } from "../config.js";
+import { getCurrentView, getCurrentZoomLevel } from "../config.js";
 
 export function createZoomControls(svg, zoom) {
 
@@ -91,6 +91,14 @@ export function createZoomControls(svg, zoom) {
     .style("-moz-user-select", "none")
     .style("-ms-user-select", "none")
     .text("⟳");
+
+  resetZoom.on("click", () => {
+    const zoomingLevel = getCurrentZoomLevel();
+    svg.transition().duration(300).call(
+      zoom.transform,
+      zoomingLevel
+    );
+  });
 
   zoomIn.on("click", () => {
     svg.transition().duration(300).call(zoom.scaleBy, 1.3);

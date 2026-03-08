@@ -1,5 +1,5 @@
 import { showDepartments, showArrondissements, updateZoneIndicator } from "./layers.js";
-import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView, getCurrentDeptData } from "../config.js";
+import { setCurrentArrData, setCurrentDeptData, setCurrentRegionData, setCurrentView, getCurrentDeptData, setCurrentZoomLevel } from "../config.js";
 import { enablePanAndZoom } from "../components/zoomControls.js";
 import { enableButtons } from "../components/sidebar.js";
 import { updateHistogram_Type } from "../components/histogram_type.js";
@@ -10,13 +10,21 @@ import { updateScatter_AltiSurf } from "../components/scatter_alti_surf.js";
 
 export function zoomToFeature(path, svg, zoom, d, paddingFactor = 0.8) {
   const [[x0, y0], [x1, y1]] = path.bounds(d);
-  svg.transition().duration(750).call(
-    zoom.transform,
-    d3.zoomIdentity
-      .translate(svg.node().getBoundingClientRect().width / 2, svg.node().getBoundingClientRect().height / 2)
-      .scale(Math.min(40, paddingFactor / Math.max((x1 - x0) / svg.node().getBoundingClientRect().width, (y1 - y0) / svg.node().getBoundingClientRect().height)))
-      .translate(-(x0 + x1) / 2, -(y0 + y1) / 2)
-  );
+  const { width, height } = svg.node().getBoundingClientRect();
+
+  const transform = d3.zoomIdentity
+    .translate(width / 2, height / 2)
+    .scale(Math.min(
+      40,
+      paddingFactor / Math.max((x1 - x0) / width, (y1 - y0) / height)
+    ))
+    .translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
+
+  svg.transition()
+    .duration(750)
+    .call(zoom.transform, transform);
+
+  return transform;
 }
 
 export function clicked(event, d, path, svg, zoom, regionsLayer, deptsData, deptToRegion, currentDataMap, tooltip, deptsLayer, backButton, arrLayer, arrData, allParcelles, zoomControls) {
@@ -93,8 +101,9 @@ export function zoomToArr(event, d, backButton, path, svg, zoom, arrLayer, zoomC
   enableButtons();
   event.stopPropagation();
   backButton.text("← Retour au Département");
-  zoomToFeature(path, svg, zoom, d, 0.9);
+  const transform = zoomToFeature(path, svg, zoom, d, 0.9);
   arrLayer.selectAll("path").transition().duration(750).style("opacity", node => node === d ? 1 : 0.1);
+  setCurrentZoomLevel(transform);
   const dept = getCurrentDeptData();
   if (dept) updateZoneIndicator(dept.properties.nom);
 }

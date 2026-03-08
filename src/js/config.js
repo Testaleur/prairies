@@ -23,6 +23,13 @@ export function getCurrentDeptData() {
 export function getCurrentArrData() {
   return currentArrData;
 }
+export var currentZoomLevel = null
+export function setCurrentZoomLevel(value){
+  currentZoomLevel = value
+}
+export function getCurrentZoomLevel() {
+  return currentZoomLevel;
+}
 
 // état de la vue affichée
 export let currentView = "FRANCE";
