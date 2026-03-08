@@ -1,4 +1,4 @@
-// Tooltip dédié au scatterplot
+// Tooltip dédié au scatterplot (inchangé)
 let scatterTooltip = d3.select("#scatter-tooltip");
 if (scatterTooltip.empty()) {
     scatterTooltip = d3.select("body")
@@ -28,38 +28,58 @@ export function updateScatter_AltiSurf(parcelles, zoneName = "France") {
     container.selectAll("*").remove();
     const svg = container.append("svg").attr("width", width).attr("height", height);
 
-    // 1. Filtrage et préparation des données (échantillonnage si trop de points)
-    let data = parcelles
+    // 1. Préparation de TOUTES les données
+    let allData = parcelles
         .map(p => ({ alt: +p.alt_mean, surf: +p.SURF_PARC }))
         .filter(d => !isNaN(d.alt) && !isNaN(d.surf) && d.surf > 0);
 
-    // Si trop de points (> 2000), on échantillonne pour garder de la performance
-    if (data.length > 2000) {
-        data = d3.shuffle(data).slice(0, 2000);
+    if (allData.length === 0) return;
+
+    // 2. Calcul des limites réelles (stabilité de l'axe)
+    const absoluteMaxSurf = d3.max(allData, d => d.surf);
+    const absoluteMaxAlt = d3.max(allData, d => d.alt);
+
+    // 3. Échantillonnage INTELLIGENT
+    let displayData;
+    if (allData.length <= 5000) {
+        displayData = allData;
+    } else {
+        // Étape A : On isole les points "records" (ceux qui touchent les bords du graph)
+        // On prend les 10 plus grandes surfaces et les 10 plus hautes altitudes pour être sûr
+        const sortedBySurf = [...allData].sort((a, b) => b.surf - a.surf);
+        const sortedByAlt = [...allData].sort((a, b) => b.alt - a.alt);
+        
+        const topPoints = new Set([
+            ...sortedBySurf.slice(0, 10), 
+            ...sortedByAlt.slice(0, 10)
+        ]);
+
+        // Étape B : On prépare le reste des données pour le tirage au sort
+        const others = allData.filter(d => !topPoints.has(d));
+        
+        // Étape C : On mélange et on complète pour arriver à 5000 points
+        const sampledOthers = d3.shuffle(others).slice(0, 5000 - topPoints.size);
+        
+        displayData = [...topPoints, ...sampledOthers];
     }
 
-    // 2. Échelles
+    // 4. Échelles (toujours basées sur les records réels)
     const x = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.alt) || 3000]).nice()
+        .domain([0, absoluteMaxAlt]).nice()
         .range([margin.left, width - margin.right]);
 
     const y = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.surf) || 100]).nice()
+        .domain([0, absoluteMaxSurf]).nice()
         .range([height - margin.bottom, margin.top]);
 
-    // 3. Axes
+    // 5. Axes et Labels
     svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).ticks(10))
-        .append("text")
-        .attr("x", width - margin.right)
-        .attr("y", -10)
-        .attr("fill", "#666")
-        .attr("text-anchor", "end")
+        .call(d3.axisBottom(x).ticks(10));
         
     svg.append("text")
         .attr("x", (width - margin.left - margin.right) / 2 + margin.left)
-        .attr("y", height - 15) // Positionné près du bord bas
+        .attr("y", height - 15)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("font-weight", "bold")
@@ -68,42 +88,30 @@ export function updateScatter_AltiSurf(parcelles, zoneName = "France") {
 
     svg.append("g")
         .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(8))
-        .append("text")
-        .attr("x", 10)
-        .attr("y", margin.top)
-        .attr("fill", "#666")
-        .attr("text-anchor", "start")
-        .attr("transform", "rotate(-90)")
+        .call(d3.axisLeft(y).ticks(8));
 
-    // --- Label axe Y (Ajouté ici) ---
     svg.append("text")
-        .attr("transform", "rotate(-90)") // Rotation pour l'aligner verticalement
-        .attr("x", -(height / 2))         // Centré par rapport à la hauteur
-        .attr("y", 20)                    // Positionné à gauche de l'axe
+        .attr("transform", "rotate(-90)")
+        .attr("x", -(height / 2))
+        .attr("y", 20)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("font-weight", "bold")
         .style("fill", "#333")
         .text("Surface (ha)");
-        
 
-    // 4. Points (Cercles)
+    // 6. Dessin des points
     svg.append("g")
         .selectAll("circle")
-        .data(data)
+        .data(displayData)
         .join("circle")
         .attr("cx", d => x(d.alt))
         .attr("cy", d => y(d.surf))
         .attr("r", 3)
-        .attr("fill", "#9b59b6") // Couleur Violette pour ce graphique
-        .attr("opacity", 0.5)
+        .attr("fill", "#9b59b6")
+        .attr("opacity", 0.6)
         .on("mouseover", (event, d) => {
-            d3.select(event.currentTarget)
-                .attr("r", 6)
-                .attr("opacity", 1)
-                .attr("stroke", "#000");
-            
+            d3.select(event.currentTarget).attr("r", 6).attr("opacity", 1).attr("stroke", "#000");
             scatterTooltip.style("opacity", 1)
                 .html(`<strong>Altitude :</strong> ${Math.round(d.alt)} m<br/><strong>Surface :</strong> ${d.surf.toFixed(2)} ha`);
         })
@@ -111,10 +119,7 @@ export function updateScatter_AltiSurf(parcelles, zoneName = "France") {
             scatterTooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 30) + "px");
         })
         .on("mouseout", (event) => {
-            d3.select(event.currentTarget)
-                .attr("r", 3)
-                .attr("opacity", 0.5)
-                .attr("stroke", "none");
+            d3.select(event.currentTarget).attr("r", 3).attr("opacity", 0.6).attr("stroke", "none");
             scatterTooltip.style("opacity", 0);
         });
 }
