@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Carte des prairies</title>
-    <script type="module" crossorigin src="/prairies/assets/index-vMYkdbaM.js"></script>
-    <link rel="stylesheet" crossorigin href="/prairies/assets/index-C5UZrCrI.css">
+    <script type="module" crossorigin src="/prairies/assets/index-C-Hgjxqc.js"></script>
+    <link rel="stylesheet" crossorigin href="/prairies/assets/index-BgmSROyK.css">
   </head>
   <body>
     <div id="app-container">
@@ -37,8 +37,15 @@
     
 
       <aside id="sidebar">
-        <h2>Contrôles</h2>
-        
+        <h2 id = "descriptionh2">Description du projet</h2>
+
+        <div class="control-group">
+          <button id = btnExplication>
+            Lire quelques explications
+          </button>
+        </div>
+
+        <h2 id = "controlh2">Contrôles</h2>        
 
         <div class="control-group">
           <label for="prairie-type">Type de prairie</label>
@@ -80,10 +87,21 @@
 
         <div class="control-group" id = "checkbox-group">
           <label><input type="checkbox" id="check-prairies"> Afficher les prairies</label>
-          <label><input type="checkbox" id="check-alt"> Afficher l'altitude</label>
+          <!-- <label><input type="checkbox" id="check-alt"> Afficher l'altitude</label> -->
         </div>
 
+        <div class="sidebar-sources">
+          <hr>
+          <p class="sources-title">Données utilisées</p>
+          <a href="https://geoservices.ign.fr/rpg" target="_blank">geoservices.ign</a><br>
+          <a href="https://entrepot.recherche.data.gouv.fr/dataverse/RPG_sol_climat" target="_blank">
+            entrepot.recherche.data.gouv
+          </a>
+        </div>
+
+
       </aside>
+
 
     </div>
 
@@ -100,6 +118,37 @@
         <h3>Action requise :</h3>
         <p>Merci de <strong>sélectionner un arrondissement</strong> avant d'afficher les prairies / altitudes.</p>
         <button id="closePopupGen">OK</button>
+      </div>
+    </div>
+
+    <div id="popupExplications" class="popup-overlay">
+      <div class="popup-box sidebar-style" id = "popupBoxExplications">
+        <h3>Quelques cas d'usage :</h3>
+        <p>
+          Cette application a pour but la visualisation et l'analyse des parcelles de prairies à différentes échelles
+          territoriales en France. L'outil principal est une carte interactive. Les données sont issues de deux sources, prises sur l'année 2023.
+        </p>
+        <p>  
+          Il permet la comparaison de statistiques simples entre les régions, les départements et les arrondissements (en les sélectionnant
+          par clic), comme le nombre de parcelles, l'altitude moyenne et la surface totale de prairies sur la zone, 
+          en survolant la zone avec la souris.
+        </p>
+        <p>
+          L'outil permet également d'observer la répartition des prairies au sein d'un arrondissement donné.
+          En sélectionnant un arrondissement, l'utilisateur peut visualiser les parcelles et examiner leurs caractéristiques, 
+          notamment les altitudes minimale, moyenne et maximale. 
+          Cela permet par exemple d'identifier les zones de prairies situées en altitude ou au contraire dans des zones plus basses.
+          Un autre cas d'usage important est le filtrage des parcelles selon leurs caractéristiques agricoles. 
+        </p>
+        <p>
+          Les prairies peuvent être sélectionnées en fonction de leur type de culture, ce qui permet d'analyser la répartition de certains types de prairies sur le territoire. 
+        </p>
+        <p>
+          Enfin, on trouve des graphes interactifs connectés aux filtres et à la carte en dessous de cette dernière.
+        </p>
+        <p style="font-weight: bold;">Testez l'application en cliquant sur des régions, en visualisant les graphes, et en jouant avec les filtres!</p>
+
+        <button id="closePopupExplications">OK</button>
       </div>
     </div>
 
